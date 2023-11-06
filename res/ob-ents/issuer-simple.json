@@ -1,0 +1,7 @@
+{
+            "@context": "https://w3id.org/openbadges/v2",
+            "id": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-simple.json",
+            "type": "Issuer",
+            "name": "Issues - Simple",
+            "url": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-simple.json"
+        }

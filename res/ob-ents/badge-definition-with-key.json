@@ -1,0 +1,12 @@
+{
+            "@context": "https://w3id.org/openbadges/v2",
+            "id": "https://hoijui.github.io/obadgen/res/ob-ents/badge-definition-with-key.json",
+            "type": "BadgeClass",
+            "name": "Badge - with key",
+            "description": "A signed badge",
+            "image": "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png",
+            "criteria": "http://thejeshgn.com/subscribe",
+            "tags": ["tagX", "other-tag"],
+            "alignment": [],
+            "issuer": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json"
+        }

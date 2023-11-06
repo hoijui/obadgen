@@ -1,0 +1,8 @@
+{
+            "@context": "https://w3id.org/openbadges/v2",
+            "id": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json",
+            "type": "Issuer",
+            "name": "Issues - with key",
+            "url": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json",
+    "publicKey": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json"
+        }
