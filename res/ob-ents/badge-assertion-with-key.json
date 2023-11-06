@@ -1,7 +1,7 @@
 {
             "@context": "https://w3id.org/openbadges/v2",
             "type": "Assertion",
-            "id": "https://hoijui.github.io/obadgen/res/ob-ents/badge-assertion-with-key.json",
+            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-assertion-with-key.json",
             "recipient":
             {
                 "type": "email",
@@ -9,11 +9,11 @@
     "salt": "abcdefg123456789",
                 "identity": "sha256488842626ec74a0468d90ea17dc4e11c2d0e8e54e45c5075fbd1d2e767f44249"
             },
-            "badge": "https://hoijui.github.io/obadgen/res/ob-ents/badge-definition-with-key.json",
+            "badge": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-with-key.json",
             "verification":
             {
                 "type": "SignedBadge",
-    "creator": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json"
+    "creator": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json"
             },
             "issuedOn": "2022-06-17T23:59:59Z",
             "expires": "2099-06-30T23:59:59Z"

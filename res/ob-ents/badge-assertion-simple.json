@@ -1,14 +1,14 @@
 {
             "@context": "https://w3id.org/openbadges/v2",
             "type": "Assertion",
-            "id": "https://hoijui.github.io/obadgen/res/ob-ents/badge-assertion-simple.json",
+            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-assertion-simple.json",
             "recipient":
             {
                 "type": "email",
                 "hashed": true,
                 "identity": "sha256488842626ec74a0468d90ea17dc4e11c2d0e8e54e45c5075fbd1d2e767f44249"
             },
-            "badge": "https://hoijui.github.io/obadgen/res/ob-ents/badge-definition-simple.json",
+            "badge": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-simple.json",
             "verification":
             {
                 "type": "HostedBadge"

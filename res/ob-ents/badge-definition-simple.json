@@ -1,6 +1,6 @@
 {
             "@context": "https://w3id.org/openbadges/v2",
-            "id": "https://hoijui.github.io/obadgen/res/ob-ents/badge-definition-simple.json",
+            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-simple.json",
             "type": "BadgeClass",
             "name": "Badge - Simple",
             "description": "A simple, hosted badge, with a minimal set of properties",
@@ -8,5 +8,5 @@
             "criteria": "http://thejeshgn.com/subscribe",
             "tags": ["tagX", "other-tag"],
             "alignment": [],
-            "issuer": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-simple.json"
+            "issuer": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-simple.json"
         }

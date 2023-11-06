@@ -1,6 +1,6 @@
 {
             "@context": "https://w3id.org/openbadges/v2",
-            "id": "https://hoijui.github.io/obadgen/res/ob-ents/badge-definition-with-key.json",
+            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-with-key.json",
             "type": "BadgeClass",
             "name": "Badge - with key",
             "description": "A signed badge",
@@ -8,5 +8,5 @@
             "criteria": "http://thejeshgn.com/subscribe",
             "tags": ["tagX", "other-tag"],
             "alignment": [],
-            "issuer": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json"
+            "issuer": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json"
         }

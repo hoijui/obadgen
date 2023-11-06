@@ -1,12 +1,12 @@
 {
             "@context": "https://w3id.org/openbadges/v2",
             "type": "CryptographicKey",
-            "id": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json",
-            "owner": "https://hoijui.github.io/obadgen/res/ob-ents/issuer-with-key.json",
+            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
+            "owner": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
             "publicKeyPem": "-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg62zEhJOq7djmHOee
-CJsPI5UZDS7u2Gn8m/x+C+NsNFChRANCAASNBuEMQUG35x9h6gQUfJgzLCS50JHp
-oK3p5AXUR3PHy7V2bLDUT4ean998FkSVTnZ7htQBh6ikKCcobl4yUnzs
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgWY9LjklFhpSWvaXC
+P99RFNqpHOGU47AWtARiO2+uQeyhRANCAAQBB6An/IrcKnVRz/tEwKsJYbHug+SU
+1Ku6VVFa1ZNx1tOwXWMZj7FUOofvBqV+PaJcpqpVmoHn2oo8oR/NHnLz
 -----END PRIVATE KEY-----
 "
         }
