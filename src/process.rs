@@ -2,7 +2,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+use std::borrow::Cow;
+use std::fs;
+
+use chrono::DateTime;
+
 use crate::environment::Environment;
+use crate::open_badge::OpenBadgeType;
+use crate::std_error::Error;
+use crate::{constants, hash, signature};
 use crate::{patcher, patcher::Patcher, BoxResult};
 
 /// The main function of this crate,
@@ -12,28 +20,40 @@ use crate::{patcher, patcher::Patcher, BoxResult};
 ///
 /// TODO
 pub fn run(environment: &mut Environment) -> BoxResult<()> {
-    // This generates OpenBadge 2.0 compatible JSON-LD that represents an issue of a badge for an individual.
-    let badge_issue = r#"{
-        "@context": "https://w3id.org/openbadges/v2",
-        "type": "Assertion",
-        "id": "https://thejeshgn.github.io/openbadge/thejeshgn-reader-badge.json",
-        "recipient":
-        {
-            "type": "email",
-            "hashed": true,
-            "identity": "sha256$2439c199971e44a07babc5854f5a7fae04028f1c85f492a70bddfa9f55d54130"
-        },
-        "badge": "https://thejeshgn.github.io/openbadge/reader-badge.json",
-        "verification":
-        {
-            "type": "hosted"
-        },
-        "issuedOn": "2022-06-17T23:59:59Z",
-        "expires": "2030-06-30T23:59:59Z"
-    }"#;
-
     let verify_url = "https://thejeshgn.github.io/openbadge/thejeshgn-reader-badge.json";
-    let verify_url = if true { badge_issue } else { verify_url };
+    let verify_url = if true {
+        let use_key = true;
+        if use_key {
+            let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
+            let badge_assert = crate::open_badge::BadgeAssertion {
+                id: constants::BADGE_ASSERTION_WITH_KEY_ID,
+                badge_id: constants::BADGE_DEFINITION_WITH_KEY_ID,
+                recipient_salt: Some(constants::EMAIL_SALT),
+                recipient_hashed_email: &email_hash,
+                verification_public_key: Some(constants::KEY_ID),
+                issued_on: DateTime::parse_from_rfc3339("2022-06-17T23:59:59Z")?,
+                expires: DateTime::parse_from_rfc3339("2022-06-17T23:59:59Z")?,
+            };
+            let private_key_str = fs::read_to_string(constants::ISSUER_KEY_PATH_PRIV)?;
+            let content = signature::sign(&badge_assert, private_key_str.as_bytes())
+                .map_err(|err| Error::Message(err.message().to_owned()))?;
+            Cow::Owned(content)
+        } else {
+            let badge_assert = crate::open_badge::BadgeAssertion {
+                id: "https://thejeshgn.github.io/openbadge/thejeshgn-reader-badge.json",
+                recipient_salt: None,
+                recipient_hashed_email:
+                    "sha256$2439c199971e44a07babc5854f5a7fae04028f1c85f492a70bddfa9f55d54130",
+                badge_id: "https://thejeshgn.github.io/openbadge/reader-badge.json",
+                verification_public_key: None,
+                issued_on: DateTime::parse_from_rfc3339("2022-06-17T23:59:59Z")?,
+                expires: DateTime::parse_from_rfc3339("2022-06-17T23:59:59Z")?,
+            };
+            Cow::Owned(badge_assert.serialize())
+        }
+    } else {
+        Cow::Borrowed(verify_url)
+    };
     let fail_if_very_present = true;
 
     let input_file_path = "res/media/img/test.svg";
@@ -41,7 +61,7 @@ pub fn run(environment: &mut Environment) -> BoxResult<()> {
     patcher::svg::Patcher::rewrite(
         input_file_path,
         output_file_path,
-        verify_url,
+        &verify_url,
         fail_if_very_present,
     )?;
 
@@ -50,7 +70,7 @@ pub fn run(environment: &mut Environment) -> BoxResult<()> {
     patcher::png::Patcher::rewrite(
         input_file_path,
         output_file_path,
-        verify_url,
+        &verify_url,
         fail_if_very_present,
     )?;
 

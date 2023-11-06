@@ -7,11 +7,12 @@
 use chrono::DateTime;
 use obadgen::constants;
 use obadgen::hash;
+use obadgen::open_badge::OpenBadgeType;
 use obadgen::BoxResult;
+use rcgen::generate_simple_self_signed;
 use rcgen::RcgenError;
 use std::fs;
 use tracing::Level;
-use rcgen::generate_simple_self_signed;
 
 const DT_PAST: &str = "2022-06-17T23:59:59Z";
 const DT_FAR_FUTURE: &str = "2099-06-30T23:59:59Z";
@@ -39,82 +40,97 @@ fn mkdir(dir: &str) -> std::io::Result<()> {
 }
 
 fn write_simple() -> BoxResult<()> {
-    let issuer = obadgen::open_badge::create_issuer(
-        constants::ISSUER_SIMPLE_ID,
-        "Issues - Simple",
-        constants::ISSUER_SIMPLE_URL,
-        None,
-    );
-    write_to_file(constants::ISSUER_SIMPLE_PATH, issuer)?;
+    let issuer = obadgen::open_badge::Issuer {
+        id: constants::ISSUER_SIMPLE_ID,
+        name: "Issues - Simple",
+        url: constants::ISSUER_SIMPLE_URL,
+        public_key: None,
+    };
+    write_to_file(constants::ISSUER_SIMPLE_PATH, issuer.serialize())?;
 
-    let badge_def = obadgen::open_badge::create_badge_definition(
-        constants::BADGE_DEFINITION_SIMPLE_ID,
-        "Badge - Simple",
-        "A simple, hosted badge, with a minimal set of properties",
-        "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
-        "http://thejeshgn.com/subscribe", // TODO
-        ["tagX", "other-tag"].to_vec(),
-        [].to_vec(),
-        constants::ISSUER_SIMPLE_URL, // TODO ... or should it rather be ..._ID?
-    );
-    write_to_file(constants::BADGE_DEFINITION_SIMPLE_PATH, badge_def)?;
+    let badge_def = obadgen::open_badge::BadgeDefinition {
+        id: constants::BADGE_DEFINITION_SIMPLE_ID,
+        name: "Badge - Simple",
+        description: "A simple, hosted badge, with a minimal set of properties",
+        image_url: "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
+        criteria: "http://thejeshgn.com/subscribe", // TODO
+        tags: ["tagX", "other-tag"].to_vec(),
+        alignment: [].to_vec(),
+        issuer: constants::ISSUER_SIMPLE_URL, // TODO ... or should it rather be ..._ID?
+    };
+    write_to_file(
+        constants::BADGE_DEFINITION_SIMPLE_PATH,
+        badge_def.serialize(),
+    )?;
 
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-    let badge_asser = obadgen::open_badge::create_badge_assertion(
-        constants::BADGE_ASSERTION_SIMPLE_ID,
-        constants::BADGE_DEFINITION_SIMPLE_ID,
-        None,
-        &email_hash,
-        None,
-        &DateTime::parse_from_rfc3339(DT_PAST)?,
-        &DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?,
-    );
-    write_to_file(constants::BADGE_ASSERTION_SIMPLE_PATH, badge_asser)?;
+    let badge_asser = obadgen::open_badge::BadgeAssertion {
+        id: constants::BADGE_ASSERTION_SIMPLE_ID,
+        badge_id: constants::BADGE_DEFINITION_SIMPLE_ID,
+        recipient_salt: None,
+        recipient_hashed_email: &email_hash,
+        verification_public_key: None,
+        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?,
+        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?,
+    };
+    write_to_file(
+        constants::BADGE_ASSERTION_SIMPLE_PATH,
+        badge_asser.serialize(),
+    )?;
 
     Ok(())
 }
 
 fn write_with_key() -> BoxResult<()> {
-    write_key_pair(
+    let (_issuer_key_priv, issuer_key_pub) = write_key_pair(
         constants::ISSUER_KEY_PATH_PRIV,
         constants::ISSUER_KEY_PATH_PUB,
     )?;
-    write_key_pair(
-        constants::VERIFICATION_KEY_PATH_PRIV,
-        constants::VERIFICATION_KEY_PATH_PUB,
+
+    let crypto_key = obadgen::open_badge::CryptographicKey {
+        id: constants::KEY_ID,
+        owner_id: constants::ISSUER_WITH_KEY_ID,
+        public_key_pem: &issuer_key_pub,
+    };
+    write_to_file(constants::KEY_PATH, crypto_key.serialize())?;
+
+    let issuer = obadgen::open_badge::Issuer {
+        id: constants::ISSUER_WITH_KEY_ID,
+        name: "Issues - with key",
+        url: constants::ISSUER_WITH_KEY_URL,
+        public_key: Some(constants::KEY_ID),
+    };
+    write_to_file(constants::ISSUER_WITH_KEY_PATH, issuer.serialize())?;
+
+    let badge_def = obadgen::open_badge::BadgeDefinition {
+        id: constants::BADGE_DEFINITION_WITH_KEY_ID,
+        name: "Badge - with key",
+        description: "A signed badge",
+        image_url: "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
+        criteria: "http://thejeshgn.com/subscribe", // TODO
+        tags: ["tagX", "other-tag"].to_vec(),
+        alignment: [].to_vec(),
+        issuer: constants::ISSUER_WITH_KEY_URL, // TODO ... or should it rather be ..._ID?
+    };
+    write_to_file(
+        constants::BADGE_DEFINITION_WITH_KEY_PATH,
+        badge_def.serialize(),
     )?;
 
-    let issuer = obadgen::open_badge::create_issuer(
-        constants::ISSUER_WITH_KEY_ID,
-        "Issues - with key",
-        constants::ISSUER_WITH_KEY_URL,
-        Some(constants::ISSUER_KEY_PATH_PUB),
-    );
-    write_to_file(constants::ISSUER_WITH_KEY_PATH, issuer)?;
-
-    let badge_def = obadgen::open_badge::create_badge_definition(
-        constants::BADGE_DEFINITION_WITH_KEY_ID,
-        "Badge - with key",
-        "A signed badge",
-        "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
-        "http://thejeshgn.com/subscribe", // TODO
-        ["tagX", "other-tag"].to_vec(),
-        [].to_vec(),
-        constants::ISSUER_WITH_KEY_URL, // TODO ... or should it rather be ..._ID?
-    );
-    write_to_file(constants::BADGE_DEFINITION_WITH_KEY_PATH, badge_def)?;
-
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-    let badge_asser = obadgen::open_badge::create_badge_assertion(
-        constants::BADGE_ASSERTION_WITH_KEY_ID,
-        constants::BADGE_DEFINITION_WITH_KEY_ID,
-        Some(constants::EMAIL_SALT),
-        &email_hash,
-        Some(constants::VERIFICATION_KEY_PATH_PUB),
-        &DateTime::parse_from_rfc3339(DT_PAST)?,
-        &DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?,
-    );
-    write_to_file(constants::BADGE_ASSERTION_WITH_KEY_PATH, badge_asser)?;
+    let badge_asser = obadgen::open_badge::BadgeAssertion {
+        id: constants::BADGE_ASSERTION_WITH_KEY_ID,
+        badge_id: constants::BADGE_DEFINITION_WITH_KEY_ID,
+        recipient_salt: Some(constants::EMAIL_SALT),
+        recipient_hashed_email: &email_hash,
+        verification_public_key: Some(constants::KEY_ID),
+        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?,
+        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?,
+    };
+    write_to_file(
+        constants::BADGE_ASSERTION_WITH_KEY_PATH,
+        badge_asser.serialize(),
+    )?;
 
     Ok(())
 }
@@ -131,7 +147,6 @@ fn main() -> BoxResult<()> {
 }
 
 fn generate_key_pair() -> Result<(String, String), RcgenError> {
-
     let subject_alt_names = vec!["hello.world.example".to_string(), "localhost".to_string()];
 
     let cert = generate_simple_self_signed(subject_alt_names)?;
@@ -142,9 +157,12 @@ fn generate_key_pair() -> Result<(String, String), RcgenError> {
     Ok((cert.serialize_pem()?, cert.serialize_private_key_pem()))
 }
 
-fn write_key_pair(issuer_key_path_priv: &str, issuer_key_path_pub: &str) -> BoxResult<()> {
+fn write_key_pair(
+    issuer_key_path_priv: &str,
+    issuer_key_path_pub: &str,
+) -> BoxResult<(String, String)> {
     let (key_priv, key_pub) = generate_key_pair()?;
-    write_to_file(issuer_key_path_priv, key_priv)?;
-    write_to_file(issuer_key_path_pub, key_pub)?;
-    Ok(())
+    write_to_file(issuer_key_path_priv, &key_priv)?;
+    write_to_file(issuer_key_path_pub, &key_pub)?;
+    Ok((key_priv, key_pub))
 }

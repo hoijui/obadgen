@@ -128,7 +128,9 @@ impl super::Patcher for Patcher {
                     namespace: _,
                 } = &evt_in
                 {
-                    if Some("http://openbadges.org") == name.namespace.as_deref() && name.local_name == "assertion" {
+                    if Some("http://openbadges.org") == name.namespace.as_deref()
+                        && name.local_name == "assertion"
+                    {
                         for attr in attributes {
                             if attr.name.local_name == "verify" {
                                 verify_attr_val = Some(attr.value.clone());
