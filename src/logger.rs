@@ -4,8 +4,8 @@
 
 use std::io;
 
+use crate::box_err::BoxResult;
 use crate::settings::Verbosity;
-use obadgen::BoxResult;
 use tracing::metadata::LevelFilter;
 use tracing_subscriber::{
     fmt,

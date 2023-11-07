@@ -7,7 +7,7 @@
 use chrono::DateTime;
 use obadgen::constants;
 use obadgen::hash;
-use obadgen::open_badge::OpenBadgeType;
+use obadgen::open_badge::Type;
 use obadgen::BoxResult;
 use rcgen::generate_simple_self_signed;
 use rcgen::RcgenError;

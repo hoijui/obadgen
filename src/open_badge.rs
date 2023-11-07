@@ -8,7 +8,7 @@ use chrono::{DateTime, SecondsFormat, TimeZone};
 
 pub const RDF_CONTEXT: &str = "https://w3id.org/openbadges/v2";
 
-pub trait OpenBadgeType {
+pub trait Type {
     /// This generates Open Badge JSON-LD
     /// that represents the specific type.
     fn serialize(&self) -> String;
@@ -36,7 +36,7 @@ pub fn str_list_to_string_rep<S: AsRef<str> + Display>(list: &[S]) -> String {
     s
 }
 
-/// OpenBadge 2.0 Issuer/Profile
+/// Open Badge 2.0 Issuer/Profile
 ///
 /// - [Definition](http://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/index.html#Profile)
 /// - [Example](http://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/examples/index.html#Issuer)
@@ -47,7 +47,7 @@ pub struct Issuer<S: AsRef<str> + Display> {
     pub public_key: Option<S>,
 }
 
-impl<S: AsRef<str> + Display> OpenBadgeType for Issuer<S> {
+impl<S: AsRef<str> + Display> Type for Issuer<S> {
     /// This generates Open Badge 2.0 compatible JSON-LD
     /// that represents a badge issuer (a person or organization);
     /// to then be hosted under the given URL.
@@ -81,7 +81,7 @@ pub struct BadgeDefinition<S: AsRef<str> + Display> {
     pub issuer: S,
 }
 
-impl<S: AsRef<str> + Display> OpenBadgeType for BadgeDefinition<S> {
+impl<S: AsRef<str> + Display> Type for BadgeDefinition<S> {
     /// This generates Open Badge 2.0 compatible JSON-LD
     /// that represents a badge definition;
     /// to then be hosted under the given URL.
@@ -121,9 +121,7 @@ pub struct BadgeAssertion<S: AsRef<str> + Display, Tz1: TimeZone, Tz2: TimeZone>
     pub expires: DateTime<Tz2>,
 }
 
-impl<S: AsRef<str> + Display, Tz1: TimeZone, Tz2: TimeZone> OpenBadgeType
-    for BadgeAssertion<S, Tz1, Tz2>
-{
+impl<S: AsRef<str> + Display, Tz1: TimeZone, Tz2: TimeZone> Type for BadgeAssertion<S, Tz1, Tz2> {
     /// This generates Open Badge 2.0 compatible JSON-LD
     /// that represents an issue of a badge for an individual.
     fn serialize(&self) -> String {
@@ -178,7 +176,7 @@ pub struct CryptographicKey<S: AsRef<str> + Display> {
     pub public_key_pem: S,
 }
 
-impl<S: AsRef<str> + Display> OpenBadgeType for CryptographicKey<S> {
+impl<S: AsRef<str> + Display> Type for CryptographicKey<S> {
     /// This generates Open Badge 2.0 compatible JSON-LD
     /// that represents a (JWS) cryptographic key for validating an assertion
     /// that uses ["signed" hosting](http://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/index.html#CryptographicKey)
@@ -200,7 +198,7 @@ impl<S: AsRef<str> + Display> OpenBadgeType for CryptographicKey<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::BoxResult;
+    use crate::box_err::BoxResult;
     use chrono::DateTime;
 
     #[test]

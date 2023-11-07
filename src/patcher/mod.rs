@@ -5,7 +5,7 @@
 pub mod png;
 pub mod svg;
 
-use crate::BoxError;
+use crate::box_err::BoxError;
 use std::path::Path;
 
 use thiserror::Error;
@@ -53,4 +53,15 @@ pub trait Patcher {
         verify: S,
         fail_if_verify_present: bool,
     ) -> Result<(), Error>;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_util::is_good_error;
+
+    #[test]
+    fn normal_types() {
+        is_good_error::<Error>();
+    }
 }

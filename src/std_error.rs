@@ -34,3 +34,14 @@ pub enum Error {
     #[error("{0}")]
     Message(String),
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_util::is_good_error;
+
+    #[test]
+    fn normal_types() {
+        is_good_error::<Error>();
+    }
+}

@@ -9,7 +9,7 @@ use jws::compact::{decode_verify, encode_sign};
 use jws::hmac::{HmacVerifier, Hs512Signer};
 use jws::{JsonObject, JsonValue};
 
-use crate::open_badge::{BadgeAssertion, OpenBadgeType};
+use crate::open_badge::{BadgeAssertion, Type};
 
 fn encode_decode() -> jws::Result<()> {
     // Add custom header parameters.
@@ -38,21 +38,25 @@ pub fn sign<S: AsRef<str> + Display, Tz1: TimeZone, Tz2: TimeZone>(
     // Add custom header parameters.
     let mut header = JsonObject::new();
     // header.insert(String::from("typ"), JsonValue::from("text/plain"));
-    header.insert(String::from("alg"), JsonValue::from("RS256"));
+    // header.insert(String::from("alg"), JsonValue::from("RS256"));
+    // header.insert(String::from("alg"), JsonValue::from("RS512"));
 
     let payload = badge_assertion.serialize();
     // Encode and sign the message.
-    // let encoded = encode_sign(header, payload.as_bytes(), &Hs256Signer::new(secret_key))?;
+    // let encoded = encode_sign(header, payload.as_bytes(), &Rs256Signer::new(secret_key))?;
     let encoded = encode_sign(header, payload.as_bytes(), &Hs512Signer::new(secret_key))?;
 
-    // Decode and verify the message.
-    let decoded = decode_verify(encoded.data().as_bytes(), &HmacVerifier::new(b"secretkey"))?;
+    let verify = true;
+    if verify {
+        // Decode and verify the message.
+        let decoded = decode_verify(encoded.data().as_bytes(), &HmacVerifier::new(secret_key))?;
 
-    assert_eq!(decoded.payload, b"payload");
-    assert_eq!(
-        decoded.header.get("typ").and_then(|x| x.as_str()),
-        Some("text/plain")
-    );
+        assert_eq!(decoded.payload, payload.as_bytes());
+        assert_eq!(
+            decoded.header.get("alg").and_then(|x| x.as_str()),
+            Some("HS512")
+        );
+    }
 
     Ok(encoded.into_data())
 }

@@ -2,6 +2,9 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+#![feature(trait_alias)]
+
+pub mod box_err;
 pub mod constants;
 pub mod environment;
 pub mod hash;
@@ -11,12 +14,10 @@ pub mod process;
 pub mod settings;
 pub mod signature;
 pub mod std_error;
+#[cfg(test)]
+mod test_util;
 
 use git_version::git_version;
-
-/// This serves as a very general, catch-all error type.
-pub type BoxError = Box<dyn std::error::Error + Send + Sync>;
-pub type BoxResult<T> = Result<T, BoxError>;
 
 pub const VERSION: &str = git_version!();
 

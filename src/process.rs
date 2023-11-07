@@ -8,10 +8,10 @@ use std::fs;
 use chrono::DateTime;
 
 use crate::environment::Environment;
-use crate::open_badge::OpenBadgeType;
+use crate::open_badge::Type;
 use crate::std_error::Error;
+use crate::{box_err::BoxResult, patcher, patcher::Patcher};
 use crate::{constants, hash, signature};
-use crate::{patcher, patcher::Patcher, BoxResult};
 
 /// The main function of this crate,
 /// TODO
@@ -35,8 +35,14 @@ pub fn run(environment: &mut Environment) -> BoxResult<()> {
                 expires: DateTime::parse_from_rfc3339("2022-06-17T23:59:59Z")?,
             };
             let private_key_str = fs::read_to_string(constants::ISSUER_KEY_PATH_PRIV)?;
-            let content = signature::sign(&badge_assert, private_key_str.as_bytes())
-                .map_err(|err| Error::Message(err.message().to_owned()))?;
+            let content =
+                signature::sign(&badge_assert, private_key_str.as_bytes()).map_err(|err| {
+                    Error::Message(format!(
+                        "Failed to sign because: {}: '{}'",
+                        err.kind(),
+                        err.message()
+                    ))
+                })?;
             Cow::Owned(content)
         } else {
             let badge_assert = crate::open_badge::BadgeAssertion {
