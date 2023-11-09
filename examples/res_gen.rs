@@ -5,10 +5,10 @@
 /// You may run this with:
 /// cargo run --example res_gen
 use chrono::DateTime;
+use obadgen::box_err::BoxResult;
 use obadgen::constants;
 use obadgen::hash;
 use obadgen::open_badge::Type;
-use obadgen::BoxResult;
 use rcgen::generate_simple_self_signed;
 use rcgen::RcgenError;
 use std::fs;
@@ -46,7 +46,7 @@ fn write_simple() -> BoxResult<()> {
         url: constants::ISSUER_SIMPLE_URL,
         public_key: None,
     };
-    write_to_file(constants::ISSUER_SIMPLE_PATH, issuer.serialize())?;
+    write_to_file(constants::ISSUER_SIMPLE_PATH, issuer.serialize_to_json())?;
 
     let badge_def = obadgen::open_badge::BadgeDefinition {
         id: constants::BADGE_DEFINITION_SIMPLE_ID,
@@ -60,7 +60,7 @@ fn write_simple() -> BoxResult<()> {
     };
     write_to_file(
         constants::BADGE_DEFINITION_SIMPLE_PATH,
-        badge_def.serialize(),
+        badge_def.serialize_to_json(),
     )?;
 
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
@@ -70,12 +70,12 @@ fn write_simple() -> BoxResult<()> {
         recipient_salt: None,
         recipient_hashed_email: &email_hash,
         verification_public_key: None,
-        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?,
-        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?,
+        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?.into(),
+        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?.into(),
     };
     write_to_file(
         constants::BADGE_ASSERTION_SIMPLE_PATH,
-        badge_asser.serialize(),
+        badge_asser.serialize_to_json(),
     )?;
 
     Ok(())
@@ -92,7 +92,7 @@ fn write_with_key() -> BoxResult<()> {
         owner_id: constants::ISSUER_WITH_KEY_ID,
         public_key_pem: &issuer_key_pub,
     };
-    write_to_file(constants::KEY_PATH, crypto_key.serialize())?;
+    write_to_file(constants::KEY_PATH, crypto_key.serialize_to_json())?;
 
     let issuer = obadgen::open_badge::Issuer {
         id: constants::ISSUER_WITH_KEY_ID,
@@ -100,7 +100,7 @@ fn write_with_key() -> BoxResult<()> {
         url: constants::ISSUER_WITH_KEY_URL,
         public_key: Some(constants::KEY_ID),
     };
-    write_to_file(constants::ISSUER_WITH_KEY_PATH, issuer.serialize())?;
+    write_to_file(constants::ISSUER_WITH_KEY_PATH, issuer.serialize_to_json())?;
 
     let badge_def = obadgen::open_badge::BadgeDefinition {
         id: constants::BADGE_DEFINITION_WITH_KEY_ID,
@@ -114,7 +114,7 @@ fn write_with_key() -> BoxResult<()> {
     };
     write_to_file(
         constants::BADGE_DEFINITION_WITH_KEY_PATH,
-        badge_def.serialize(),
+        badge_def.serialize_to_json(),
     )?;
 
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
@@ -124,12 +124,12 @@ fn write_with_key() -> BoxResult<()> {
         recipient_salt: Some(constants::EMAIL_SALT),
         recipient_hashed_email: &email_hash,
         verification_public_key: Some(constants::KEY_ID),
-        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?,
-        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?,
+        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?.into(),
+        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?.into(),
     };
     write_to_file(
         constants::BADGE_ASSERTION_WITH_KEY_PATH,
-        badge_asser.serialize(),
+        badge_asser.serialize_to_json(),
     )?;
 
     Ok(())

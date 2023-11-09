@@ -4,7 +4,7 @@
 
 /// You may run this with:
 /// cargo run --example cert_gen
-use obadgen::BoxResult;
+use obadgen::box_err::BoxResult;
 use rcgen::generate_simple_self_signed;
 
 fn main() -> BoxResult<()> {

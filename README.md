@@ -37,15 +37,66 @@ helps in generating basic [OpenBadge](https://openbadges.org/) annotated images.
 
 TODO
 
+Create a self-signed x.509 certificate with RSA keys in PEM format:
+
 ```shell
 CERT_DOMAIN="example.com"
-openssl \
-    req \
+openssl req \
     -x509 \
     -sha256 \
     -nodes \
     -newkey rsa:4096 \
-    -keyout "${CERT_DOMAIN}.key" \
+    -keyout "$CERT_DOMAIN.key" \
     -days 730 \
-    -out "${CERT_DOMAIN}.pem"
+    -out "$CERT_DOMAIN.pem"
+```
+
+Converts an RSA key-pair into the DER format:
+
+```shell
+CERT_DOMAIN="example.com"
+openssl rsa \
+    -RSAPublicKey_in \
+    -in "$CERT_DOMAIN.pem" \
+    -inform PEM \
+    -outform DER \
+    -RSAPublicKey_out \
+    -out "$CERT_DOMAIN.der"
+```
+
+Generates a (DER encoded) RSA key-pair inside a single file:
+
+```shell
+CERT_DOMAIN="example.com"
+openssl genpkey \
+    -algorithm RSA \
+    -pkeyopt rsa_keygen_bits:4096 \
+    -outform der \
+    -out "$CERT_DOMAIN.priv_pair.der"
+```
+
+Extracts the public key from the key-pair file
+created in the example above:
+
+```shell
+CERT_DOMAIN="example.com"
+openssl rsa \
+    -in "$CERT_DOMAIN.priv_pair.der" \
+    -inform DER \
+    -RSAPublicKey_out \
+    -outform DER \
+    -out "$CERT_DOMAIN.pub.der"
+```
+
+To converta PEM encoded public key into a DER encoded one:
+
+```shell
+CERT_DOMAIN="example.com"
+openssl rsa \
+    -RSAPublicKey_in \
+    -in "$CERT_DOMAIN.pub.pem" \
+    -inform PEM \
+    -outform DER \
+    -RSAPublicKey_out \
+    -out "$CERT_DOMAIN.pub.der"
 ```

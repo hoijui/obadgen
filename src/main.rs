@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-#![feature(trait_alias)]
 #![warn(rust_2021_compatibility)]
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]
@@ -31,29 +30,30 @@
 #![allow(clippy::struct_excessive_bools)]
 #![allow(clippy::fn_params_excessive_bools)]
 
-use box_err::BoxResult;
 use clap::{command, value_parser, Arg, ArgAction, ArgMatches, Command, ValueHint};
 use const_format::formatcp;
 use lazy_static::lazy_static;
+use obadgen::box_err::BoxResult;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
-pub mod box_err;
-mod constants;
-mod environment;
-mod hash;
+// pub mod box_err;
+// mod constants;
+// mod environment;
+// mod hash;
 mod logger;
-pub mod open_badge;
-mod patcher;
-mod process;
-pub mod settings;
-mod signature;
-mod std_error;
-#[cfg(test)]
-mod test_util;
+// pub mod open_badge;
+// mod patcher;
+// mod process;
+// pub mod settings;
+// mod signature;
+// mod std_error;
+// #[cfg(test)]
+// mod test_util;
 
-use crate::environment::Environment;
-use crate::settings::{Settings, Verbosity};
+use obadgen::constants;
+use obadgen::environment::Environment;
+use obadgen::settings::{self, Settings, Verbosity};
 
 pub const A_L_VERSION: &str = "version";
 pub const A_S_VERSION: char = 'V';
@@ -387,5 +387,5 @@ fn main() -> BoxResult<()> {
     let mut environment = Environment::new(settings);
     log::trace!("Created Environment.");
 
-    process::run(&mut environment)
+    obadgen::process::run(&mut environment)
 }
