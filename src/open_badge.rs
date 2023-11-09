@@ -7,7 +7,10 @@ use std::{fmt::Display, marker::PhantomData};
 
 use chrono::{DateTime, FixedOffset, SecondsFormat, TimeZone};
 use monostate::MustBe;
-use serde::{Deserialize, Deserializer, Serialize, Serializer, de::{DeserializeOwned, Visitor, value::StringDeserializer}};
+use serde::{
+    de::{value::StringDeserializer, DeserializeOwned, Visitor},
+    Deserialize, Deserializer, Serialize, Serializer,
+};
 
 pub const RDF_CONTEXT: &str = "https://w3id.org/openbadges/v2";
 macro_rules! rdf_context {
@@ -48,14 +51,7 @@ pub fn str_list_to_string_rep<S: AsRef<str> + Display>(list: &[S]) -> String {
 ///
 /// - [Definition](http://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/index.html#Profile)
 /// - [Example](http://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/examples/index.html#Issuer)
-#[derive(
-    Debug,
-    Eq,
-    PartialEq,
-    Clone,
-    Serialize,
-    Deserialize,
-)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Issuer<S: AsRef<str> + Display> {
     pub id: S,
     pub name: S,
@@ -86,14 +82,7 @@ impl<S: AsRef<str> + Display> Type for Issuer<S> {
     }
 }
 
-#[derive(
-    Debug,
-    Eq,
-    PartialEq,
-    Clone,
-    Serialize,
-    Deserialize,
-)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub struct BadgeDefinition<S: AsRef<str> + Display> {
     pub id: S,
     pub name: S,
@@ -135,12 +124,7 @@ impl<S: AsRef<str> + Display> Type for BadgeDefinition<S> {
     }
 }
 
-#[derive(
-    Debug,
-    Eq,
-    PartialEq,
-    Clone,
-)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct SerdeDateTime(DateTime<FixedOffset>);
 
 impl Serialize for SerdeDateTime {
@@ -168,7 +152,9 @@ impl<'de> Visitor<'de> for SerdeDateTimeVisitor {
     where
         E: serde::de::Error,
     {
-        Ok(SerdeDateTime(DateTime::parse_from_rfc3339(value).map_err(|err| E::custom(err.to_string()))?))
+        Ok(SerdeDateTime(
+            DateTime::parse_from_rfc3339(value).map_err(|err| E::custom(err.to_string()))?,
+        ))
     }
 }
 
@@ -185,8 +171,53 @@ impl<'de> Deserialize<'de> for SerdeDateTime {
     }
 }
 
+#[derive(Debug, Default, Eq, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+#[serde(tag = "type")]
+pub enum RecipientType {
+    // TODO Allow other ID types then email!
+    #[default]
+    EMail,
+}
+
 #[derive(
     Debug,
+    // Default,
+    Eq,
+    PartialEq,
+    Clone,
+    Serialize,
+    Deserialize,
+)]
+// #[serde(rename_all = "camelCase")]
+#[serde(rename_all = "lowercase")]
+// #[serde(default)]
+#[serde(rename = "Recipient")]
+#[serde(tag = "type")]
+pub enum BadgeRecipient {
+    // TODO Allow other ID types then email!
+    // #[default]
+    // #[serde(rename = "email")]
+    EMail {
+        identity: String,
+        hashed: bool,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        salt: Option<String>,
+    },
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum Verification {
+    #[default]
+    HostedBadge,
+    #[serde(rename_all = "camelCase")]
+    SignedBadge { creator: String },
+}
+
+#[derive(
+    Debug,
+    // Default,
     Eq,
     PartialEq,
     Clone,
@@ -195,63 +226,20 @@ impl<'de> Deserialize<'de> for SerdeDateTime {
 )]
 #[serde(rename_all = "camelCase")]
 // #[serde(default)]
-#[serde(rename = "Recipient")]
-pub struct BadgeRecipient {
-    pub salt: Option<String>,
-    pub hashed_email: String, // TODO Allow other ID types then email!
-}
-
-#[derive(
-    Debug,
-    Default,
-    Eq,
-    PartialEq,
-    Clone,
-    Serialize,
-    Deserialize,
-)]
-#[serde(rename_all = "camelCase")]
-#[serde(tag = "type")]
-pub enum Verification {
-    #[default]
-    HostedBadge,
-    SignedBadge,
-}
-
-
-#[derive(
-    Debug,
-    Eq,
-    PartialEq,
-    Clone,
-    Serialize,
-    Deserialize,
-)]
-#[serde(rename_all = "camelCase")]
-#[serde(default)]
 #[serde(rename = "Assertion")]
 pub struct BadgeAssertion {
     #[serde(rename = "@context")]
-    context: MustBe!("https://w3id.org/openbadges/v2"),
-    r#type: MustBe!("Assertion"),
+    pub context: MustBe!("https://w3id.org/openbadges/v2"),
+    pub r#type: MustBe!("Assertion"),
     pub id: String,
-    pub badge_id: String,
+    pub badge: String,
     pub recipient: BadgeRecipient,
     pub verification: Verification,
-    // #[serde(from = "SerdeDateTime")]
-    // #[serde(into = "SerdeDateTime")]
-    pub issued_on: DateTime<FixedOffset>,
+    pub issued_on: SerdeDateTime,
     pub expires: SerdeDateTime,
 }
 
-#[derive(
-    Debug,
-    Eq,
-    PartialEq,
-    Clone,
-    Serialize,
-    Deserialize,
-)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[serde(default)]
 #[serde(rename = "Assertion")]
@@ -267,80 +255,58 @@ pub struct BadgeAssertionVar<S: AsRef<str> + Display + Serialize> {
     pub expires: SerdeDateTime,
 }
 
-impl<S: AsRef<str> + Display + Serialize + DeserializeOwned> biscuit::CompactJson for BadgeAssertion<S> {}
+impl biscuit::CompactJson for BadgeAssertion {}
 
-// impl BadgeAssertion<&str> {
-//     pub fn to_deserializable(&self) -> BadgeAssertion<String> {
-//         BadgeAssertion {
-//             sssss: MustBe!("Assertion"),
-//             id: self.id.to_string(),
-//             badge_id: self.badge_id.to_string(),
-//             recipient_salt: self.recipient_salt.map(ToString::to_string),
-//             recipient_hashed_email: self.recipient_hashed_email.to_string(),
-//             verification_public_key: self.verification_public_key.map(ToString::to_string),
-//             issued_on: self.issued_on.clone(),
-//             expires: self.expires.clone(),
-//         }
+// impl<S: AsRef<str> + Display + Serialize> Type for BadgeAssertion<S> {
+//     /// This generates Open Badge 2.0 compatible JSON-LD
+//     /// that represents an issue of a badge for an individual.
+//     fn serialize_to_json(&self) -> String {
+//         let verification_type = if self.verification_public_key.is_some() {
+//             // alternative: "signed"
+//             "SignedBadge"
+//         } else {
+//             // alternative: "hosted"
+//             "HostedBadge"
+//         };
+//         let verification_creator_opt = if let Some(public_key_str) = &self.verification_public_key {
+//             format!(",\n    \"creator\": \"{public_key_str}\"")
+//         } else {
+//             String::new()
+//         };
+//         let recipient_salt_opt = if let Some(recipient_salt_str) = &self.recipient_salt {
+//             format!(",\n    \"salt\": \"{recipient_salt_str}\"")
+//         } else {
+//             String::new()
+//         };
+//         format!(
+//             r#"{{
+//             "@context": "{RDF_CONTEXT}",
+//             "type": "Assertion",
+//             "id": "{}",
+//             "recipient":
+//             {{
+//                 "type": "email",
+//                 "hashed": true{recipient_salt_opt},
+//                 "identity": "{}"
+//             }},
+//             "badge": "{}",
+//             "verification":
+//             {{
+//                 "type": "{verification_type}"{verification_creator_opt}
+//             }},
+//             "issuedOn": "{}",
+//             "expires": "{}"
+//         }}"#,
+//             self.id,
+//             self.recipient_hashed_email,
+//             self.badge_id,
+//             self.issued_on.0.to_rfc3339_opts(SecondsFormat::Secs, true),
+//             self.expires.0.to_rfc3339_opts(SecondsFormat::Secs, true),
+//         )
 //     }
 // }
 
-impl<S: AsRef<str> + Display + Serialize> Type for BadgeAssertion<S> {
-    /// This generates Open Badge 2.0 compatible JSON-LD
-    /// that represents an issue of a badge for an individual.
-    fn serialize_to_json(&self) -> String {
-        let verification_type = if self.verification_public_key.is_some() {
-            // alternative: "signed"
-            "SignedBadge"
-        } else {
-            // alternative: "hosted"
-            "HostedBadge"
-        };
-        let verification_creator_opt = if let Some(public_key_str) = &self.verification_public_key {
-            format!(",\n    \"creator\": \"{public_key_str}\"")
-        } else {
-            String::new()
-        };
-        let recipient_salt_opt = if let Some(recipient_salt_str) = &self.recipient_salt {
-            format!(",\n    \"salt\": \"{recipient_salt_str}\"")
-        } else {
-            String::new()
-        };
-        format!(
-            r#"{{
-            "@context": "{RDF_CONTEXT}",
-            "type": "Assertion",
-            "id": "{}",
-            "recipient":
-            {{
-                "type": "email",
-                "hashed": true{recipient_salt_opt},
-                "identity": "{}"
-            }},
-            "badge": "{}",
-            "verification":
-            {{
-                "type": "{verification_type}"{verification_creator_opt}
-            }},
-            "issuedOn": "{}",
-            "expires": "{}"
-        }}"#,
-            self.id,
-            self.recipient_hashed_email,
-            self.badge_id,
-            self.issued_on.0.to_rfc3339_opts(SecondsFormat::Secs, true),
-            self.expires.0.to_rfc3339_opts(SecondsFormat::Secs, true),
-        )
-    }
-}
-
-#[derive(
-    Debug,
-    Eq,
-    PartialEq,
-    Clone,
-    Serialize,
-    Deserialize,
-)]
+#[derive(Debug, Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub struct CryptographicKey<S: AsRef<str> + Display> {
     pub id: S,
     pub owner_id: S,
@@ -369,7 +335,7 @@ impl<S: AsRef<str> + Display> Type for CryptographicKey<S> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::box_err::BoxResult;
+    use crate::{box_err::BoxResult, constants};
     use chrono::DateTime;
 
     #[test]
@@ -491,18 +457,28 @@ mod tests {
     #[test]
     fn test_badge_assertion() -> Result<(), Box<dyn std::error::Error>> {
         let simple = BadgeAssertion {
-            id: "https://thejeshgn.github.io/openbadge/thejeshgn-reader-badge.json",
-            badge_id: "https://thejeshgn.github.io/openbadge/reader-badge.json",
-            recipient_salt: None,
-            recipient_hashed_email:
-                "sha256$2439c199971e44a07babc5854f5a7fae04028f1c85f492a70bddfa9f55d54130",
-            verification_public_key: None,
-            issued_on: SerdeDateTime(DateTime::parse_from_rfc3339("2022-06-17T23:59:59Z")?),
-            expires: SerdeDateTime(DateTime::parse_from_rfc3339("2030-06-30T23:59:59Z")?),
+            context: MustBe!("https://w3id.org/openbadges/v2"),
+            r#type: MustBe!("Assertion"),
+            id: "https://thejeshgn.github.io/openbadge/thejeshgn-reader-badge.json".to_string(),
+            badge: "https://thejeshgn.github.io/openbadge/reader-badge.json".to_string(),
+            recipient: BadgeRecipient::EMail {
+                hashed: true,
+                identity: "sha256$2439c199971e44a07babc5854f5a7fae04028f1c85f492a70bddfa9f55d54130"
+                    .to_string(),
+                salt: None,
+            },
+            verification: Verification::HostedBadge,
+            issued_on: SerdeDateTime(DateTime::parse_from_rfc3339(constants::DT_PAST)?),
+            expires: SerdeDateTime(DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?),
         };
 
+        let simple_json_serde = serde_json::to_string_pretty(&simple)?;
+        std::fs::write("simple_json_serde.json", &simple_json_serde)?;
+        // let simple_json_our_own = simple.serialize_to_json();
+        // std::fs::write("simple_json_our_own.json", &simple_json_our_own)?;
+
         assert_eq!(
-            simple.serialize_to_json(),
+            serde_json::to_string_pretty(&simple)?,
         r#"{
             "@context": "https://w3id.org/openbadges/v2",
             "type": "Assertion",
@@ -519,17 +495,11 @@ mod tests {
                 "type": "HostedBadge"
             },
             "issuedOn": "2022-06-17T23:59:59Z",
-            "expires": "2030-06-30T23:59:59Z"
+            "expires": "2099-06-30T23:59:59Z"
         }"#.to_owned()
         );
 
-        let simple_json_serde = serde_json::to_string_pretty(&simple)?;
-        let simple_json_our_own = simple.serialize_to_json();
-
-        std::fs::write("simple_json_serde.json", &simple_json_serde)?;
-        std::fs::write("simple_json_our_own.json", &simple_json_our_own)?;
-
-        assert_eq!(simple_json_our_own, simple_json_serde);
+        // assert_eq!(simple_json_our_own, simple_json_serde);
 
         Ok(())
     }

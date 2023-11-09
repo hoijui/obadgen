@@ -18,5 +18,5 @@ pub fn sha256<S: AsRef<str>>(input: S) -> String {
     //     b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9
     // ")[..]);
 
-    format!("sha256{result:x}")
+    format!("sha256${result:x}")
 }

@@ -5,17 +5,19 @@
 /// You may run this with:
 /// cargo run --example res_gen
 use chrono::DateTime;
+use monostate::MustBe;
 use obadgen::box_err::BoxResult;
 use obadgen::constants;
 use obadgen::hash;
+use obadgen::open_badge::BadgeRecipient;
+use obadgen::open_badge::RecipientType;
 use obadgen::open_badge::Type;
+use obadgen::open_badge::Verification;
 use rcgen::generate_simple_self_signed;
 use rcgen::RcgenError;
 use std::fs;
 use tracing::Level;
 
-const DT_PAST: &str = "2022-06-17T23:59:59Z";
-const DT_FAR_FUTURE: &str = "2099-06-30T23:59:59Z";
 // REUSE-IgnoreStart
 const REUSE_EXPRS: &str = r#"SPDX-FileCopyrightText: Robin Vobruba <hoijui.quaero@gmail.com>
 SPDX-License-Identifier: Unlicense"#;
@@ -64,19 +66,22 @@ fn write_simple() -> BoxResult<()> {
     )?;
 
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-    let badge_asser = obadgen::open_badge::BadgeAssertion {
-        id: constants::BADGE_ASSERTION_SIMPLE_ID,
-        badge_id: constants::BADGE_DEFINITION_SIMPLE_ID,
-        recipient_salt: None,
-        recipient_hashed_email: &email_hash,
-        verification_public_key: None,
-        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?.into(),
-        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?.into(),
+    let badge_assert = obadgen::open_badge::BadgeAssertion {
+        context: MustBe!("https://w3id.org/openbadges/v2"),
+        r#type: MustBe!("Assertion"),
+        id: constants::BADGE_ASSERTION_SIMPLE_ID.to_string(),
+        badge: constants::BADGE_DEFINITION_SIMPLE_ID.to_string(),
+        recipient: BadgeRecipient::EMail {
+            hashed: true,
+            identity: email_hash,
+            salt: None,
+        },
+        verification: Verification::HostedBadge,
+        issued_on: DateTime::parse_from_rfc3339(constants::DT_PAST)?.into(),
+        expires: DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into(),
     };
-    write_to_file(
-        constants::BADGE_ASSERTION_SIMPLE_PATH,
-        badge_asser.serialize_to_json(),
-    )?;
+    let badge_assert_ser = serde_json::to_string_pretty(&badge_assert)?;
+    write_to_file(constants::BADGE_ASSERTION_SIMPLE_PATH, badge_assert_ser)?;
 
     Ok(())
 }
@@ -118,19 +123,24 @@ fn write_with_key() -> BoxResult<()> {
     )?;
 
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-    let badge_asser = obadgen::open_badge::BadgeAssertion {
-        id: constants::BADGE_ASSERTION_WITH_KEY_ID,
-        badge_id: constants::BADGE_DEFINITION_WITH_KEY_ID,
-        recipient_salt: Some(constants::EMAIL_SALT),
-        recipient_hashed_email: &email_hash,
-        verification_public_key: Some(constants::KEY_ID),
-        issued_on: DateTime::parse_from_rfc3339(DT_PAST)?.into(),
-        expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?.into(),
+    let badge_assert = obadgen::open_badge::BadgeAssertion {
+        context: MustBe!("https://w3id.org/openbadges/v2"),
+        r#type: MustBe!("Assertion"),
+        id: constants::BADGE_ASSERTION_WITH_KEY_ID.to_string(),
+        badge: constants::BADGE_DEFINITION_WITH_KEY_ID.to_string(),
+        recipient: BadgeRecipient::EMail {
+            hashed: true,
+            identity: email_hash,
+            salt: Some(constants::EMAIL_SALT.to_string()),
+        },
+        verification: Verification::SignedBadge {
+            creator: constants::KEY_ID.to_string(),
+        },
+        issued_on: DateTime::parse_from_rfc3339(constants::DT_PAST)?.into(),
+        expires: DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into(),
     };
-    write_to_file(
-        constants::BADGE_ASSERTION_WITH_KEY_PATH,
-        badge_asser.serialize_to_json(),
-    )?;
+    let badge_assert_ser = serde_json::to_string_pretty(&badge_assert)?;
+    write_to_file(constants::BADGE_ASSERTION_WITH_KEY_PATH, badge_assert_ser)?;
 
     Ok(())
 }

@@ -74,9 +74,6 @@ mod tests {
     use crate::{box_err::BoxResult, constants, hash, open_badge};
     use chrono::DateTime;
 
-    const DT_PAST: &str = "2022-06-17T23:59:59Z";
-    const DT_FAR_FUTURE: &str = "2099-06-30T23:59:59Z";
-
     fn sign_and_verify<S: AsRef<str> + Display, Tz1: TimeZone, Tz2: TimeZone>(
         badge_assertion: &BadgeAssertion<S, Tz1, Tz2>,
         secret_key: &[u8],
@@ -106,8 +103,8 @@ mod tests {
             recipient_salt: Some(constants::EMAIL_SALT),
             recipient_hashed_email: &email_hash,
             verification_public_key: Some(constants::KEY_ID),
-            issued_on: DateTime::parse_from_rfc3339(DT_PAST)?,
-            expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?,
+            issued_on: DateTime::parse_from_rfc3339(constants::DT_PAST)?,
+            expires: DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?,
         };
         let key_priv = fs::read_to_string(constants::ISSUER_KEY_PATH_PRIV)?;
         let key_pub = fs::read_to_string(constants::ISSUER_KEY_PATH_PUB)?;

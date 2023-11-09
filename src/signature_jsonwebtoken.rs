@@ -60,9 +60,6 @@ mod tests {
     use jsonwebtoken::{DecodingKey, Validation, decode};
     use serde::de::DeserializeOwned;
 
-    const DT_PAST: &str = "2022-06-17T23:59:59Z";
-    const DT_FAR_FUTURE: &str = "2099-06-30T23:59:59Z";
-
     fn sign_and_verify<S: AsRef<str> + Display + Serialize + DeserializeOwned + PartialEq>(
         badge_assertion: &BadgeAssertion<S>,
         secret_key: &[u8],
@@ -92,8 +89,8 @@ mod tests {
             recipient_salt: Some(constants::EMAIL_SALT.to_string()),
             recipient_hashed_email: email_hash,
             verification_public_key: Some(constants::KEY_ID.to_string()),
-            issued_on: DateTime::parse_from_rfc3339(DT_PAST)?.into(),
-            expires: DateTime::parse_from_rfc3339(DT_FAR_FUTURE)?.into(),
+            issued_on: DateTime::parse_from_rfc3339(constants::DT_PAST)?.into(),
+            expires: DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into(),
         };
         // let key_priv = fs::read_to_string(constants::ISSUER_KEY_PATH_PRIV)?;
         // let key_pub = fs::read_to_string(constants::ISSUER_KEY_PATH_PUB)?;

@@ -47,13 +47,13 @@ pub enum Error {
 pub trait Patcher {
     /// Rewrites ("bakes" in Open Badge terms) an image file,
     /// adding Open Badge meta-data.
-    /// 
+    ///
     /// # Errors
-    /// 
+    ///
     /// Reading the source file failed.
-    /// 
+    ///
     /// Manipulating the data failed.
-    /// 
+    ///
     /// Writing the target file failed.
     fn rewrite<P: AsRef<Path>, S: AsRef<str>>(
         input_file: P,
