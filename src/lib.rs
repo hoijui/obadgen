@@ -11,11 +11,11 @@ pub mod hash;
 pub mod open_badge;
 pub mod patcher;
 pub mod process;
+pub mod serde_date_time;
 pub mod settings;
 pub mod signature;
 pub mod std_error;
-#[cfg(test)]
-mod test_util;
+pub mod util;
 
 use git_version::git_version;
 

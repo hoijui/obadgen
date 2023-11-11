@@ -2,25 +2,23 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-use std::fmt::Display;
-
 use biscuit::{
     jwa::SignatureAlgorithm,
-    jws::{Compact, Header, RegisteredHeader, Secret},
+    jws::{Compact, RegisteredHeader, Secret},
 };
-use chrono::TimeZone;
-use serde::{de::DeserializeOwned, Serialize};
 
-use crate::{
-    box_err::BoxResult,
-    open_badge::{BadgeAssertion, Type},
-};
+use crate::{box_err::BoxResult, open_badge::BadgeAssertion};
 
 /// Signs a badge.
 ///
 /// # Errors
 ///
 /// If computing the Message Authentication Code fails.
+///
+/// # Panics
+///
+/// If the biscuit crate does something really wrong internally
+/// -> Practically, this can never happen.
 pub fn sign(badge_assertion: BadgeAssertion, secret_key: &Secret) -> BoxResult<String> {
     let mut header = RegisteredHeader {
         algorithm: SignatureAlgorithm::RS256,
@@ -44,18 +42,13 @@ pub fn sign(badge_assertion: BadgeAssertion, secret_key: &Secret) -> BoxResult<S
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use super::*;
     use crate::{
         box_err::BoxResult,
         constants, hash,
-        open_badge::{self, BadgeRecipient, RecipientType, Verification},
+        open_badge::{self, Identity, Verification},
     };
     use chrono::DateTime;
-    use jsonwebtoken::{decode, DecodingKey, Validation};
-    use monostate::MustBe;
-    use serde::de::DeserializeOwned;
 
     fn sign_and_verify(
         badge_assertion: BadgeAssertion,
@@ -63,20 +56,12 @@ mod tests {
         public_key: &Secret,
     ) -> BoxResult<()> {
         let encoded = sign(badge_assertion, secret_key)?;
-
         // fs::write("badge_assert_jws.txt", &encoded)?;
 
         let encoded_parsed: Compact<BadgeAssertion, biscuit::Empty> =
             Compact::new_encoded(&encoded);
-        // Decode and verify the message.
-        // let decoded = decode_verify(encoded.as_bytes(), &HmacVerifier::new(secret_key))?; // HACK -> Wrong! should work with public key! :*/
-        let decoded = encoded_parsed.decode(public_key, SignatureAlgorithm::RS256)?;
-
-        // assert!(&decoded.claims.eq(badge_assertion));
-        // assert_eq!(
-        //     decoded.header.get("alg").and_then(|x| x.as_str()),
-        //     Some("HS512")
-        // );
+        // Decodes and verifies the message
+        let _decoded = encoded_parsed.decode(public_key, SignatureAlgorithm::RS256)?;
 
         Ok(())
     }
@@ -84,36 +69,33 @@ mod tests {
     #[test]
     fn test_sign() -> BoxResult<()> {
         let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-        let badge_asser = open_badge::BadgeAssertion {
-            context: MustBe!("https://w3id.org/openbadges/v2"),
-            r#type: MustBe!("Assertion"),
-            id: constants::BADGE_ASSERTION_WITH_KEY_ID.to_string(),
-            badge: constants::BADGE_DEFINITION_WITH_KEY_ID.to_string(),
-            recipient: BadgeRecipient::EMail {
+        let mut badge_assert = open_badge::BadgeAssertion::new(
+            constants::BADGE_ASSERTION_WITH_KEY_ID,
+            constants::BADGE_DEFINITION_WITH_KEY_ID,
+            Identity {
+                r#type: crate::open_badge::IdentityType::EMail,
                 hashed: true,
                 identity: email_hash,
                 salt: Some(constants::EMAIL_SALT.to_string()),
             },
-            verification: Verification::SignedBadge {
-                creator: constants::KEY_ID.to_string(),
+            Verification {
+                r#type: crate::open_badge::VerificationType::SignedBadge {
+                    creator: Some(constants::KEY_ID.to_string()),
+                },
+                verification_property: None,
+                starts_with: None,
+                allowed_origins: None,
             },
-            issued_on: DateTime::parse_from_rfc3339(constants::DT_PAST)?.into(),
-            expires: DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into(),
-        };
+            DateTime::parse_from_rfc3339(constants::DT_PAST)?,
+        );
+        badge_assert.expires = Some(DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into());
 
         // let key_priv = fs::read_to_string(constants::ISSUER_KEY_PATH_PRIV)?;
         // let key_pub = fs::read_to_string(constants::ISSUER_KEY_PATH_PUB)?;
         let key_priv = Secret::rsa_keypair_from_file("example.com.priv_pair.der")?;
         let key_pub = Secret::public_key_from_file("example.com.pub.der")?;
 
-        sign_and_verify(badge_asser, &key_priv, &key_pub)?;
-        // .map_err(|err| {
-        //     format!(
-        //         "Failed to sign because: {}: '{}'",
-        //         err.kind(),
-        //         err.message()
-        //     )
-        // })?;
+        sign_and_verify(badge_assert, &key_priv, &key_pub)?;
 
         Ok(())
     }

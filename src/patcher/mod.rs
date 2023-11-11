@@ -66,7 +66,7 @@ pub trait Patcher {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_util::is_good_error;
+    use crate::util::test::is_good_error;
 
     #[test]
     fn normal_types() {

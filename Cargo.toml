@@ -17,15 +17,13 @@ authors = ["Robin Vobruba <hoijui.quaero@gmail.com>"]
 publish = false
 
 [dependencies]
-biscuit = "0.6"
+biscuit = "0.7"
 chrono = "0.4"
 clap = { version = "4.0", features = ["cargo", "derive"] }
 # cli-utils = { version = "0.5", git = "https://github.com/hoijui/cli-utils-rs.git" }
 const_format = "0.2"
 git-version = "0.3"
 # human-panic = "1.0"
-jws = "0.2"
-jsonwebtoken = "9.1"
 lazy_static = "1.4"
 log = "0.4"
 monostate = "0.1"

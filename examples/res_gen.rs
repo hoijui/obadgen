@@ -5,14 +5,14 @@
 /// You may run this with:
 /// cargo run --example res_gen
 use chrono::DateTime;
-use monostate::MustBe;
 use obadgen::box_err::BoxResult;
 use obadgen::constants;
 use obadgen::hash;
-use obadgen::open_badge::BadgeRecipient;
-use obadgen::open_badge::RecipientType;
+use obadgen::open_badge::Identity;
+use obadgen::open_badge::IdentityType;
 use obadgen::open_badge::Type;
 use obadgen::open_badge::Verification;
+use obadgen::open_badge::VerificationType;
 use rcgen::generate_simple_self_signed;
 use rcgen::RcgenError;
 use std::fs;
@@ -42,44 +42,39 @@ fn mkdir(dir: &str) -> std::io::Result<()> {
 }
 
 fn write_simple() -> BoxResult<()> {
-    let issuer = obadgen::open_badge::Issuer {
-        id: constants::ISSUER_SIMPLE_ID,
-        name: "Issues - Simple",
-        url: constants::ISSUER_SIMPLE_URL,
-        public_key: None,
-    };
-    write_to_file(constants::ISSUER_SIMPLE_PATH, issuer.serialize_to_json())?;
+    let mut issuer = obadgen::open_badge::Issuer::new(constants::ISSUER_SIMPLE_ID);
+    issuer.name = Some("Issuer - simple".to_string());
+    issuer.url = Some(constants::ISSUER_SIMPLE_URL.to_string());
+    write_to_file(constants::ISSUER_SIMPLE_PATH, issuer.to_json_ld()?)?;
 
-    let badge_def = obadgen::open_badge::BadgeDefinition {
-        id: constants::BADGE_DEFINITION_SIMPLE_ID,
-        name: "Badge - Simple",
-        description: "A simple, hosted badge, with a minimal set of properties",
-        image_url: "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
-        criteria: "http://thejeshgn.com/subscribe", // TODO
-        tags: ["tagX", "other-tag"].to_vec(),
-        alignment: [].to_vec(),
-        issuer: constants::ISSUER_SIMPLE_URL, // TODO ... or should it rather be ..._ID?
-    };
+    let mut badge_def = obadgen::open_badge::BadgeDefinition::new(
+        constants::BADGE_DEFINITION_SIMPLE_ID,
+        "Badge - Simple",
+        "A simple, hosted badge, with a minimal set of properties",
+        "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
+        "http://thejeshgn.com/subscribe", // TODO
+        constants::ISSUER_SIMPLE_URL,     // TODO ... or should it rather be ..._ID?
+    );
+    badge_def.tags = ["tagX".to_string(), "other-tag".to_string()].to_vec();
     write_to_file(
         constants::BADGE_DEFINITION_SIMPLE_PATH,
-        badge_def.serialize_to_json(),
+        badge_def.to_json_ld()?,
     )?;
 
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-    let badge_assert = obadgen::open_badge::BadgeAssertion {
-        context: MustBe!("https://w3id.org/openbadges/v2"),
-        r#type: MustBe!("Assertion"),
-        id: constants::BADGE_ASSERTION_SIMPLE_ID.to_string(),
-        badge: constants::BADGE_DEFINITION_SIMPLE_ID.to_string(),
-        recipient: BadgeRecipient::EMail {
+    let mut badge_assert = obadgen::open_badge::BadgeAssertion::new(
+        constants::BADGE_ASSERTION_SIMPLE_ID.to_string(),
+        constants::BADGE_DEFINITION_SIMPLE_ID.to_string(),
+        Identity {
+            r#type: IdentityType::EMail,
             hashed: true,
             identity: email_hash,
             salt: None,
         },
-        verification: Verification::HostedBadge,
-        issued_on: DateTime::parse_from_rfc3339(constants::DT_PAST)?.into(),
-        expires: DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into(),
-    };
+        Verification::new(VerificationType::HostedBadge),
+        DateTime::parse_from_rfc3339(constants::DT_PAST)?,
+    );
+    badge_assert.expires = Some(DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into());
     let badge_assert_ser = serde_json::to_string_pretty(&badge_assert)?;
     write_to_file(constants::BADGE_ASSERTION_SIMPLE_PATH, badge_assert_ser)?;
 
@@ -92,53 +87,49 @@ fn write_with_key() -> BoxResult<()> {
         constants::ISSUER_KEY_PATH_PUB,
     )?;
 
-    let crypto_key = obadgen::open_badge::CryptographicKey {
-        id: constants::KEY_ID,
-        owner_id: constants::ISSUER_WITH_KEY_ID,
-        public_key_pem: &issuer_key_pub,
-    };
-    write_to_file(constants::KEY_PATH, crypto_key.serialize_to_json())?;
+    let crypto_key = obadgen::open_badge::CryptographicKey::new(
+        constants::KEY_ID,
+        constants::ISSUER_WITH_KEY_ID,
+        &issuer_key_pub,
+    );
+    write_to_file(constants::KEY_PATH, crypto_key.to_json_ld()?)?;
 
-    let issuer = obadgen::open_badge::Issuer {
-        id: constants::ISSUER_WITH_KEY_ID,
-        name: "Issues - with key",
-        url: constants::ISSUER_WITH_KEY_URL,
-        public_key: Some(constants::KEY_ID),
-    };
-    write_to_file(constants::ISSUER_WITH_KEY_PATH, issuer.serialize_to_json())?;
+    let mut issuer = obadgen::open_badge::Issuer::new(constants::ISSUER_WITH_KEY_ID);
+    issuer.name = Some("Issuer - with key".to_string());
+    issuer.url = Some(constants::ISSUER_WITH_KEY_URL.to_string());
+    issuer.public_key = Some(constants::KEY_ID.to_string());
+    write_to_file(constants::ISSUER_WITH_KEY_PATH, issuer.to_json_ld()?)?;
 
-    let badge_def = obadgen::open_badge::BadgeDefinition {
-        id: constants::BADGE_DEFINITION_WITH_KEY_ID,
-        name: "Badge - with key",
-        description: "A signed badge",
-        image_url: "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
-        criteria: "http://thejeshgn.com/subscribe", // TODO
-        tags: ["tagX", "other-tag"].to_vec(),
-        alignment: [].to_vec(),
-        issuer: constants::ISSUER_WITH_KEY_URL, // TODO ... or should it rather be ..._ID?
-    };
+    let mut badge_def = obadgen::open_badge::BadgeDefinition::new(
+        constants::BADGE_DEFINITION_WITH_KEY_ID,
+        "Badge - with key",
+        "A signed badge",
+        "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png", // TODO Make our own set of badges for teting, and while we're at it, also for OSH, OSEG & OSEG-OSH!
+        "http://thejeshgn.com/subscribe", // TODO
+        constants::ISSUER_WITH_KEY_URL,   // TODO ... or should it rather be ..._ID?
+    );
+    badge_def.tags = ["tagX".to_string(), "other-tag".to_string()].to_vec();
     write_to_file(
         constants::BADGE_DEFINITION_WITH_KEY_PATH,
-        badge_def.serialize_to_json(),
+        badge_def.to_json_ld()?,
     )?;
 
     let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-    let badge_assert = obadgen::open_badge::BadgeAssertion {
-        context: MustBe!("https://w3id.org/openbadges/v2"),
-        r#type: MustBe!("Assertion"),
-        id: constants::BADGE_ASSERTION_WITH_KEY_ID.to_string(),
-        badge: constants::BADGE_DEFINITION_WITH_KEY_ID.to_string(),
-        recipient: BadgeRecipient::EMail {
+    let mut badge_assert = obadgen::open_badge::BadgeAssertion::new(
+        constants::BADGE_ASSERTION_WITH_KEY_ID.to_string(),
+        constants::BADGE_DEFINITION_WITH_KEY_ID.to_string(),
+        Identity {
+            r#type: IdentityType::EMail,
             hashed: true,
             identity: email_hash,
             salt: Some(constants::EMAIL_SALT.to_string()),
         },
-        verification: Verification::SignedBadge {
-            creator: constants::KEY_ID.to_string(),
-        },
-        issued_on: DateTime::parse_from_rfc3339(constants::DT_PAST)?.into(),
-        expires: DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into(),
-    };
+        Verification::new(VerificationType::SignedBadge {
+            creator: Some(constants::KEY_ID.to_string()),
+        }),
+        DateTime::parse_from_rfc3339(constants::DT_PAST)?,
+    );
+    badge_assert.expires = Some(DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into());
     let badge_assert_ser = serde_json::to_string_pretty(&badge_assert)?;
     write_to_file(constants::BADGE_ASSERTION_WITH_KEY_PATH, badge_assert_ser)?;
 
