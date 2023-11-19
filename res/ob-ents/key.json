@@ -1,12 +1,7 @@
 {
-            "@context": "https://w3id.org/openbadges/v2",
-            "type": "CryptographicKey",
-            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
-            "owner": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
-            "publicKeyPem": "-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgWY9LjklFhpSWvaXC
-P99RFNqpHOGU47AWtARiO2+uQeyhRANCAAQBB6An/IrcKnVRz/tEwKsJYbHug+SU
-1Ku6VVFa1ZNx1tOwXWMZj7FUOofvBqV+PaJcpqpVmoHn2oo8oR/NHnLz
------END PRIVATE KEY-----
-"
-        }
+  "@context": "https://w3id.org/openbadges/v2",
+  "type": "CryptographicKey",
+  "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
+  "owner": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
+  "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1U0Hd7aBZzngMXPx+dEIrO9yyhDs\nQB4HuUIbK5CWaxuj5QCXHq9VUR+74trmBn873enu7yzZz4mLwqllyR6kqg==\n-----END PUBLIC KEY-----\n"
+}

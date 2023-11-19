@@ -1,12 +1,14 @@
 {
-            "@context": "https://w3id.org/openbadges/v2",
-            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-with-key.json",
-            "type": "BadgeClass",
-            "name": "Badge - with key",
-            "description": "A signed badge",
-            "image": "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png",
-            "criteria": "http://thejeshgn.com/subscribe",
-            "tags": ["tagX", "other-tag"],
-            "alignment": [],
-            "issuer": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json"
-        }
+  "@context": "https://w3id.org/openbadges/v2",
+  "type": "BadgeClass",
+  "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-with-key.json",
+  "name": "Badge - with key",
+  "description": "A signed badge",
+  "image": "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png",
+  "criteria": "http://thejeshgn.com/subscribe",
+  "issuer": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
+  "tags": [
+    "tagX",
+    "other-tag"
+  ]
+}

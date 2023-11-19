@@ -5,9 +5,9 @@
   "badge": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-with-key.json",
   "recipient": {
     "type": "email",
-    "identity": "sha256$488842626ec74a0468d90ea17dc4e11c2d0e8e54e45c5075fbd1d2e767f44249",
+    "identity": "sha256$a596420c9e6e6d4a7a552b2073a3b6c28807d808b37c97454ab4e419c9e5e4ad",
     "hashed": true,
-    "salt": "abcdefg123456789"
+    "salt": "dfvnk0923#%^&87t6iubasr"
   },
   "verification": {
     "type": "SignedBadge",

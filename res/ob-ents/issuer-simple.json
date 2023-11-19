@@ -1,7 +1,7 @@
 {
-            "@context": "https://w3id.org/openbadges/v2",
-            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-simple.json",
-            "type": "Issuer",
-            "name": "Issues - Simple",
-            "url": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-simple.json"
-        }
+  "@context": "https://w3id.org/openbadges/v2",
+  "type": "Issuer",
+  "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-simple.json",
+  "name": "Issuer - simple",
+  "url": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-simple.json"
+}

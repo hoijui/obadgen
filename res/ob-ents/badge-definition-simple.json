@@ -1,12 +1,14 @@
 {
-            "@context": "https://w3id.org/openbadges/v2",
-            "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-simple.json",
-            "type": "BadgeClass",
-            "name": "Badge - Simple",
-            "description": "A simple, hosted badge, with a minimal set of properties",
-            "image": "https://731860.p3cdn2.secureserver.net/blog/wp-content/uploads/2014/07/thejeshgn_icon.png",
-            "criteria": "http://thejeshgn.com/subscribe",
-            "tags": ["tagX", "other-tag"],
-            "alignment": [],
-            "issuer": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-simple.json"
-        }
+  "@context": "https://w3id.org/openbadges/v2",
+  "type": "BadgeClass",
+  "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-simple.json",
+  "name": "Badge - simple",
+  "description": "A simple, hosted badge, with a minimal set of properties",
+  "image": "res/ob-ents/badge-definition-simple-image.png",
+  "criteria": "http://thejeshgn.com/subscribe",
+  "issuer": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-simple.json",
+  "tags": [
+    "tagX",
+    "other-tag"
+  ]
+}
