@@ -5,10 +5,11 @@
 #![feature(trait_alias)]
 
 pub mod box_err;
+pub mod cert_gen;
 pub mod constants;
 pub mod environment;
 pub mod hash;
-pub mod open_badge;
+mod objects;
 pub mod patcher;
 pub mod process;
 pub mod serde_date_time;
@@ -16,6 +17,17 @@ pub mod settings;
 pub mod signature;
 pub mod std_error;
 pub mod util;
+
+pub use objects::assertion::Obj as Assertion;
+pub use objects::badge_class::Obj as BadgeClass;
+pub use objects::cryptographic_key::Obj as CryptographicKey;
+pub use objects::evidence::Obj as Evidence;
+pub use objects::identity::Obj as Identity;
+pub use objects::identity::ObjType as IdentityType;
+pub use objects::issuer::Obj as Issuer;
+pub use objects::verification::Obj as Verification;
+pub use objects::verification::ObjType as VerificationType;
+pub use objects::ToJsonLd;
 
 use git_version::git_version;
 

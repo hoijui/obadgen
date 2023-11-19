@@ -46,10 +46,22 @@ openssl req \
     -sha256 \
     -nodes \
     -newkey rsa:4096 \
-    -keyout "$CERT_DOMAIN.key" \
+    -keyform PEM \
+    -keyout "$CERT_DOMAIN.x509_cert.priv_key.pem" \
     -days 730 \
-    -out "$CERT_DOMAIN.pem"
+    -outform DER \
+    -out "$CERT_DOMAIN.x509_cert.cert_incl_pub_key.der"
 ```
+
+```shell
+# Visualize certificate for human eyes
+openssl x509 \
+    -in "$CERT_DOMAIN.x509_cert.cert_incl_pub_key.der" \
+    -inform DER \
+    -text
+```
+
+
 
 Converts an RSA key-pair into the DER format:
 

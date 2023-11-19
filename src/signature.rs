@@ -4,12 +4,23 @@
 
 use biscuit::{
     jwa::SignatureAlgorithm,
-    jws::{Compact, RegisteredHeader, Secret},
+    jws::{Compact, Header, RegisteredHeader, Secret},
 };
+use serde::{Deserialize, Serialize};
 
-use crate::{box_err::BoxResult, open_badge::BadgeAssertion};
+use crate::{box_err::BoxResult, Assertion};
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+struct HeaderExtensions {
+    #[serde(rename = "kty", skip_serializing_if = "Option::is_none")]
+    key_type: Option<String>,
+    #[serde(rename = "use", skip_serializing_if = "Option::is_none")]
+    r#use: Option<String>,
+}
 
 /// Signs a badge.
+/// If a certificate chain is given, we try to follow [this article](
+/// https://software-factotum.medium.com/validating-rsa-signature-for-a-jws-more-about-jwk-and-certificates-e8a3932669f1)
 ///
 /// # Errors
 ///
@@ -19,17 +30,30 @@ use crate::{box_err::BoxResult, open_badge::BadgeAssertion};
 ///
 /// If the biscuit crate does something really wrong internally
 /// -> Practically, this can never happen.
-pub fn sign(badge_assertion: BadgeAssertion, secret_key: &Secret) -> BoxResult<String> {
-    let mut header = RegisteredHeader {
+pub fn sign_with_cert(
+    badge_assertion: Assertion,
+    secret_key: &Secret,
+    x509_chain: Option<Vec<String>>,
+) -> BoxResult<String> {
+    let r#use = x509_chain.as_ref().map(|_| "sig".to_string());
+    let header = RegisteredHeader {
         algorithm: SignatureAlgorithm::RS256,
+        // See: <https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9>
         media_type: Some("JOSE+JSON".to_string()),
+        x509_chain,
         ..Default::default()
     };
 
-    // See: <https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.9>
-    header.media_type = Some("JOSE+JSON".to_string());
+    let header_ext = HeaderExtensions {
+        key_type: Some("RSA".to_string()),
+        r#use,
+    };
+    let header = Header {
+        registered: header,
+        private: header_ext,
+    };
 
-    let compact = Compact::new_decoded(header.into(), badge_assertion);
+    let compact = Compact::new_decoded(header, badge_assertion);
     let encoded = compact.into_encoded(secret_key)?;
     Ok(match encoded {
         Compact::Decoded {
@@ -40,26 +64,40 @@ pub fn sign(badge_assertion: BadgeAssertion, secret_key: &Secret) -> BoxResult<S
     })
 }
 
+/// Signs a badge without a certificate.
+///
+/// # Errors
+///
+/// If computing the Message Authentication Code fails.
+///
+/// # Panics
+///
+/// If the biscuit crate does something really wrong internally
+/// -> Practically, this can never happen.
+pub fn sign(badge_assertion: Assertion, secret_key: &Secret) -> BoxResult<String> {
+    sign_with_cert(badge_assertion, secret_key, None)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        box_err::BoxResult,
-        constants, hash,
-        open_badge::{self, Identity, Verification},
-    };
+    use crate::Assertion;
+    use crate::Identity;
+    use crate::IdentityType;
+    use crate::Verification;
+    use crate::VerificationType;
+    use crate::{box_err::BoxResult, constants};
     use chrono::DateTime;
 
     fn sign_and_verify(
-        badge_assertion: BadgeAssertion,
+        badge_assertion: Assertion,
         secret_key: &Secret,
         public_key: &Secret,
     ) -> BoxResult<()> {
         let encoded = sign(badge_assertion, secret_key)?;
         // fs::write("badge_assert_jws.txt", &encoded)?;
 
-        let encoded_parsed: Compact<BadgeAssertion, biscuit::Empty> =
-            Compact::new_encoded(&encoded);
+        let encoded_parsed: Compact<Assertion, biscuit::Empty> = Compact::new_encoded(&encoded);
         // Decodes and verifies the message
         let _decoded = encoded_parsed.decode(public_key, SignatureAlgorithm::RS256)?;
 
@@ -68,18 +106,17 @@ mod tests {
 
     #[test]
     fn test_sign() -> BoxResult<()> {
-        let email_hash = hash::sha256(constants::BADGE_ASSERTION_RECIPIENT_EMAIL);
-        let mut badge_assert = open_badge::BadgeAssertion::new(
+        let mut badge_assert = Assertion::new(
             constants::BADGE_ASSERTION_WITH_KEY_ID,
             constants::BADGE_DEFINITION_WITH_KEY_ID,
             Identity {
-                r#type: crate::open_badge::IdentityType::EMail,
+                r#type: IdentityType::EMail,
                 hashed: true,
-                identity: email_hash,
-                salt: Some(constants::EMAIL_SALT.to_string()),
+                identity: constants::BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED.clone(),
+                salt: Some(constants::BADGE_ASSERTION_RECIPIENT_SALT.to_string()),
             },
             Verification {
-                r#type: crate::open_badge::VerificationType::SignedBadge {
+                r#type: VerificationType::SignedBadge {
                     creator: Some(constants::KEY_ID.to_string()),
                 },
                 verification_property: None,

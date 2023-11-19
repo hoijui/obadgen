@@ -8,7 +8,8 @@ use chrono::{DateTime, FixedOffset, SecondsFormat};
 use serde::{de::Visitor, Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub struct SerdeDateTime(DateTime<FixedOffset>);
+#[repr(transparent)]
+pub struct SerdeDateTime(pub DateTime<FixedOffset>);
 
 impl Serialize for SerdeDateTime {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {

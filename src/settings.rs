@@ -131,13 +131,13 @@ pub enum ShowRetrieved {
     All(Option<PathBuf>),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Settings /*<S: ::std::hash::BuildHasher>*/ {
     // pub repo_path: Option<Box<Path>>,
-    pub repo_path: Option<PathBuf>,
+    // pub repo_path: Option<PathBuf>,
     // pub required_keys: HashSet<Key>,
-    pub overwrite: Overwrite,
-    pub date_format: String,
+    // pub overwrite: Overwrite,
+    // pub date_format: String,
     // pub fail_on: FailOn,
     // vars: Box<HashMap<String, String, S>>,
     // #[builder(default = false)]
@@ -147,6 +147,15 @@ pub struct Settings /*<S: ::std::hash::BuildHasher>*/ {
     // pub only_required: bool,
     // pub key_prefix: Option<String>,
     pub verbosity: Verbosity,
+    /// Location of the Open Badge Assertion JSON-LD to be baked.
+    pub assertion_loc: Option<PathBuf>,
+    /// Location of the private key required for signing,
+    /// if signing is used.
+    pub sign_key_loc: Option<PathBuf>,
+    /// Location of the to be baked Open Badge image.
+    pub source_image_loc: Option<PathBuf>,
+    /// Location of the to be baked Open Badge image.
+    pub baked_loc: Option<PathBuf>,
 }
 
 impl Settings {
@@ -154,16 +163,16 @@ impl Settings {
         // let mut all_keys = HashSet::<Key>::new();
         // all_keys.extend(Key::iter());
         Self {
-            repo_path: None,
+            // repo_path: None,
             // required_keys: all_keys,
-            overwrite: Overwrite::All,
-            date_format: crate::constants::DATE_FORMAT_GIT.to_string(),
+            // overwrite: Overwrite::All,
+            // date_format: crate::constants::DATE_FORMAT_GIT.to_string(),
             // fail_on: FailOn::AnyMissingValue,
             // show_retrieved: ShowRetrieved::No,
             // hosting_type: HostingType::Unknown,
             // only_required: false,
             // key_prefix: Some(constants::DEFAULT_KEY_PREFIX.to_owned()),
-            verbosity: Verbosity::None,
+            ..Default::default()
         }
     }
 

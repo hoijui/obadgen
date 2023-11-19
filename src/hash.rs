@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+use std::fmt::Display;
+
 // use hex_literal::hex;
 use sha2::{Digest, Sha256};
 
@@ -19,4 +21,11 @@ pub fn sha256<S: AsRef<str>>(input: S) -> String {
     // ")[..]);
 
     format!("sha256${result:x}")
+}
+
+pub fn sha256_with_salt<S1: AsRef<str> + Display, S2: AsRef<str> + Display>(
+    input: S1,
+    salt: S2,
+) -> String {
+    sha256(format!("{input}{salt}"))
 }

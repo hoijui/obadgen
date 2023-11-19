@@ -34,6 +34,8 @@ use clap::{command, value_parser, Arg, ArgAction, ArgMatches, Command, ValueHint
 use const_format::formatcp;
 use lazy_static::lazy_static;
 use obadgen::box_err::BoxResult;
+use obadgen::constants::BADGE_ASSERTION_SIMPLE_ID;
+use obadgen::constants::BADGE_ASSERTION_WITH_KEY_ID;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
@@ -52,29 +54,34 @@ mod logger;
 // #[cfg(test)]
 // mod test_util;
 
-use obadgen::constants;
 use obadgen::environment::Environment;
 use obadgen::settings::{self, Settings, Verbosity};
 
 pub const A_L_VERSION: &str = "version";
 pub const A_S_VERSION: char = 'V';
-const A_S_PROJECT_ROOT: char = 'C';
-const A_L_PROJECT_ROOT: &str = "project-root";
+// const A_S_PROJECT_ROOT: char = 'C';
+// const A_L_PROJECT_ROOT: &str = "project-root";
 const A_L_RAW_PANIC: &str = "raw-panic";
-const A_S_FILE_OUT: char = 'O';
-const A_L_FILE_OUT: &str = "file-out";
+const A_S_ASSERTION: char = 'a';
+const A_L_ASSERTION: &str = "assertion-in";
+const A_S_SIGNING_PRIVATE_KEY: char = 'k';
+const A_L_SIGNING_PRIVATE_KEY: &str = "key";
+const A_S_SOURCE_IMAGE: char = 's';
+const A_L_SOURCE_IMAGE: &str = "source-image";
+const A_S_BAKED_IMAGE: char = 'b';
+const A_L_BAKED_IMAGE: &str = "baked";
 const A_S_VERBOSE: char = 'v';
 const A_L_VERBOSE: &str = "verbose";
 const A_S_LOG_LEVEL: char = 'F';
 const A_L_LOG_LEVEL: &str = "log-level";
 const A_S_QUIET: char = 'q';
 const A_L_QUIET: &str = "quiet";
-const A_S_OVERWRITE: char = 'o';
-const A_L_OVERWRITE: &str = "overwrite";
-const A_S_LIST: char = 'l';
-const A_L_LIST: &str = "list";
-const A_S_DATE_FORMAT: char = 'T';
-const A_L_DATE_FORMAT: &str = "date-format";
+// const A_S_OVERWRITE: char = 'o';
+// const A_L_OVERWRITE: &str = "overwrite";
+// const A_S_LIST: char = 'l';
+// const A_L_LIST: &str = "list";
+// const A_S_DATE_FORMAT: char = 'T';
+// const A_L_DATE_FORMAT: &str = "date-format";
 
 fn arg_version() -> Arg {
     Arg::new(A_L_VERSION)
@@ -84,23 +91,23 @@ fn arg_version() -> Arg {
         .action(ArgAction::SetTrue)
 }
 
-fn arg_project_root() -> Arg {
-    Arg::new(A_L_PROJECT_ROOT)
-        .help("The root dir of the project")
-        .long_help(
-            "The root directory of the project, \
-            mainly used for SCM (e.g. git) information gathering.",
-        )
-        .num_args(1)
-        .value_parser(value_parser!(std::path::PathBuf))
-        .value_name("DIR")
-        .value_hint(ValueHint::DirPath)
-        .short(A_S_PROJECT_ROOT)
-        .long(A_L_PROJECT_ROOT)
-        .action(ArgAction::Set)
-        .required(false)
-        .default_value(".")
-}
+// fn arg_project_root() -> Arg {
+//     Arg::new(A_L_PROJECT_ROOT)
+//         .help("The root dir of the project")
+//         .long_help(
+//             "The root directory of the project, \
+//             mainly used for SCM (e.g. git) information gathering.",
+//         )
+//         .num_args(1)
+//         .value_parser(value_parser!(std::path::PathBuf))
+//         .value_name("DIR")
+//         .value_hint(ValueHint::DirPath)
+//         .short(A_S_PROJECT_ROOT)
+//         .long(A_L_PROJECT_ROOT)
+//         .action(ArgAction::Set)
+//         .required(false)
+//         .default_value(".")
+// }
 
 fn arg_raw_panic() -> Arg {
     Arg::new(A_L_RAW_PANIC)
@@ -114,24 +121,92 @@ fn arg_raw_panic() -> Arg {
         .long(A_L_RAW_PANIC)
 }
 
-fn arg_out_file() -> Arg {
-    Arg::new(A_L_FILE_OUT)
-        .help("Write variables into this file; .env or .json")
+fn arg_assertion() -> Arg {
+    Arg::new(A_L_ASSERTION)
+        .help("Read Open Badge 2.0 JSON-LD Assertion from this file.")
+        .long_help(format!(
+            "Read Open Badge 2.0 JSON-LD Assertion from this file. \
+            * The official definition (+ an example): \
+              <https://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/index.html#BadgeClass> \
+            * A simple exampel of our own: \
+              <{BADGE_ASSERTION_SIMPLE_ID}> \
+            * A signed exampel of our own: \
+              <{BADGE_ASSERTION_WITH_KEY_ID}> \
+            You can choose which format is used by the file-extension.
+            Note that \"-\" has no special meaning here; \
+            it does not mean stdout, but rather the file \"./-\".",
+        ))
+        .num_args(1)
+        .value_parser(value_parser!(std::path::PathBuf))
+        .value_name("JSON-LD-FILE")
+        .value_hint(ValueHint::FilePath)
+        .short(A_S_ASSERTION)
+        .long(A_L_ASSERTION)
+        .action(ArgAction::Set)
+        // .default_value(sinks::DEFAULT_FILE_OUT)
+        .required(false)
+}
+
+fn arg_key_file() -> Arg {
+    Arg::new(A_L_SIGNING_PRIVATE_KEY)
+        .help("Read a cryptographic private-key from this file.")
         .long_help(
-            "Write evaluated values into a file. \
+            "Read a cryptographic private-key from this file. \
+            Currently only this is suported: \
+            * DER encoding of RSA keys",
+        )
+        .num_args(1)
+        .value_parser(value_parser!(std::path::PathBuf))
+        .value_name("KEY-FILE")
+        .value_hint(ValueHint::FilePath)
+        .short(A_S_SIGNING_PRIVATE_KEY)
+        .long(A_L_SIGNING_PRIVATE_KEY)
+        .action(ArgAction::Set)
+        // .default_value(sinks::DEFAULT_FILE_OUT)
+        .required(false)
+}
+
+fn arg_source_image() -> Arg {
+    Arg::new(A_L_SOURCE_IMAGE)
+        .help("Reads source (unbaked) image from this file; .svg or .png")
+        .long_help(
+            "Reads source (unbaked) image from this file path (.svg or .png). \
             Two file formats are supported: \
-            * ENV: one KEY=VALUE pair per line (BASH syntax) \
-            * JSON: a dictionary of KEY: \"value\" \
+            * Scalable Vector Graphics - `*.svg` \
+            * Portable Network Graphics - `*.png` \
+            You can choose which format is used by the file-extension.
+            Note that \"-\" has no special meaning here; \
+            it does not mean stdin, but rather the file \"./-\".",
+        )
+        .num_args(1)
+        .value_parser(value_parser!(std::path::PathBuf))
+        .value_name("IMAGE-FILE")
+        .value_hint(ValueHint::FilePath)
+        .short(A_S_SOURCE_IMAGE)
+        .long(A_L_SOURCE_IMAGE)
+        .action(ArgAction::Set)
+        // .default_value(sinks::DEFAULT_FILE_OUT)
+        .required(false)
+}
+
+fn arg_baked() -> Arg {
+    Arg::new(A_L_BAKED_IMAGE)
+        .help("Write baked image into this file; .svg or .png")
+        .long_help(
+            "Write baked Open Badge image at this file path (.svg or .png). \
+            Two file formats are supported: \
+            * Scalable Vector Graphics - `*.svg` \
+            * Portable Network Graphics - `*.png` \
             You can choose which format is used by the file-extension.
             Note that \"-\" has no special meaning here; \
             it does not mean stdout, but rather the file \"./-\".",
         )
         .num_args(1)
         .value_parser(value_parser!(std::path::PathBuf))
-        .value_name("FILE")
+        .value_name("IMAGE-FILE")
         .value_hint(ValueHint::FilePath)
-        .short(A_S_FILE_OUT)
-        .long(A_L_FILE_OUT)
+        .short(A_S_BAKED_IMAGE)
+        .long(A_L_BAKED_IMAGE)
         .action(ArgAction::Set)
         // .default_value(sinks::DEFAULT_FILE_OUT)
         .required(false)
@@ -178,60 +253,63 @@ This does not affect the log level for the log-file.",
         .conflicts_with(A_L_VERBOSE)
 }
 
-fn arg_overwrite() -> Arg {
-    Arg::new(A_L_OVERWRITE)
-        .help("Whether to overwrite already set values in the output.")
-        .num_args(1)
-        .value_parser(value_parser!(settings::Overwrite))
-        .short(A_S_OVERWRITE)
-        .long(A_L_OVERWRITE)
-        .action(ArgAction::Set)
-        .required(false)
-    // .conflicts_with(A_L_DRY)
-}
+// fn arg_overwrite() -> Arg {
+//     Arg::new(A_L_OVERWRITE)
+//         .help("Whether to overwrite already set values in the output.")
+//         .num_args(1)
+//         .value_parser(value_parser!(settings::Overwrite))
+//         .short(A_S_OVERWRITE)
+//         .long(A_L_OVERWRITE)
+//         .action(ArgAction::Set)
+//         .required(false)
+//     // .conflicts_with(A_L_DRY)
+// }
 
-fn arg_list() -> Arg {
-    Arg::new(A_L_LIST)
-        .help("Show all properties and their keys")
-        .long_help(
-            "Prints a list of all the environment variables \
-            that are potentially set by this tool onto stdout and exits.",
-        )
-        .action(ArgAction::SetTrue)
-        .short(A_S_LIST)
-        .long(A_L_LIST)
-        .required(false)
-}
+// fn arg_list() -> Arg {
+//     Arg::new(A_L_LIST)
+//         .help("Show all properties and their keys")
+//         .long_help(
+//             "Prints a list of all the environment variables \
+//             that are potentially set by this tool onto stdout and exits.",
+//         )
+//         .action(ArgAction::SetTrue)
+//         .short(A_S_LIST)
+//         .long(A_L_LIST)
+//         .required(false)
+// }
 
-fn arg_date_format() -> Arg {
-    Arg::new(A_L_DATE_FORMAT)
-        .help("Date format for generated dates")
-        .long_help(
-            "Date format string for generated (vs supplied) dates. \
-            For details, see https://docs.rs/chrono/latest/chrono/format/strftime/index.html",
-        )
-        .num_args(1)
-        .value_parser(clap::builder::NonEmptyStringValueParser::new()) // TODO Maybe parse directly into a date format?
-        .value_hint(ValueHint::Other)
-        .short(A_S_DATE_FORMAT)
-        .long(A_L_DATE_FORMAT)
-        .action(ArgAction::Set)
-        .default_value(constants::DATE_FORMAT_GIT)
-        .required(false)
-}
+// fn arg_date_format() -> Arg {
+//     Arg::new(A_L_DATE_FORMAT)
+//         .help("Date format for generated dates")
+//         .long_help(
+//             "Date format string for generated (vs supplied) dates. \
+//             For details, see https://docs.rs/chrono/latest/chrono/format/strftime/index.html",
+//         )
+//         .num_args(1)
+//         .value_parser(clap::builder::NonEmptyStringValueParser::new()) // TODO Maybe parse directly into a date format?
+//         .value_hint(ValueHint::Other)
+//         .short(A_S_DATE_FORMAT)
+//         .long(A_L_DATE_FORMAT)
+//         .action(ArgAction::Set)
+//         .default_value(constants::DATE_FORMAT_GIT)
+//         .required(false)
+// }
 
 lazy_static! {
-    static ref ARGS: [Arg; 10] = [
+    static ref ARGS: [Arg; 9] = [
         arg_version(),
-        arg_project_root(),
+        // arg_project_root(),
         arg_raw_panic(),
-        arg_out_file(),
+        arg_assertion(),
+        arg_key_file(),
+        arg_source_image(),
+        arg_baked(),
         arg_verbose(),
         arg_log_level(),
         arg_quiet(),
-        arg_overwrite(),
-        arg_list(),
-        arg_date_format(),
+        // arg_overwrite(),
+        // arg_list(),
+        // arg_date_format(),
     ];
 }
 
@@ -281,19 +359,19 @@ fn arg_matcher() -> Command {
 //     hosting_type
 // }
 
-fn overwrite(args: &ArgMatches) -> settings::Overwrite {
-    let overwrite = args
-        .get_one::<settings::Overwrite>(A_L_OVERWRITE)
-        .copied()
-        .unwrap_or_default();
+// fn overwrite(args: &ArgMatches) -> settings::Overwrite {
+//     let overwrite = args
+//         .get_one::<settings::Overwrite>(A_L_OVERWRITE)
+//         .copied()
+//         .unwrap_or_default();
 
-    if log::log_enabled!(log::Level::Debug) {
-        let overwrite_str: &str = overwrite.into();
-        log::debug!("Overwriting output variable values? -> {}", overwrite_str);
-    }
+//     if log::log_enabled!(log::Level::Debug) {
+//         let overwrite_str: &str = overwrite.into();
+//         log::debug!("Overwriting output variable values? -> {}", overwrite_str);
+//     }
 
-    overwrite
-}
+//     overwrite
+// }
 
 /// Returns the logging verbositiy to be used.
 /// We only log to stderr;
@@ -319,23 +397,23 @@ fn verbosity(args: &ArgMatches) -> Verbosity {
     }
 }
 
-fn repo_path(args: &ArgMatches) -> PathBuf {
-    let repo_path = args
-        .get_one::<PathBuf>(A_L_PROJECT_ROOT)
-        .cloned()
-        .unwrap_or_else(PathBuf::new);
-    log::debug!("Using repo path '{:#?}'.", &repo_path);
-    repo_path
-}
+// fn repo_path(args: &ArgMatches) -> PathBuf {
+//     let repo_path = args
+//         .get_one::<PathBuf>(A_L_PROJECT_ROOT)
+//         .cloned()
+//         .unwrap_or_else(PathBuf::new);
+//     log::debug!("Using repo path '{:#?}'.", &repo_path);
+//     repo_path
+// }
 
-fn date_format(args: &ArgMatches) -> &str {
-    let date_format = match args.get_one::<String>(A_L_DATE_FORMAT) {
-        Some(date_format) => date_format,
-        None => constants::DATE_FORMAT_GIT,
-    };
-    log::debug!("Using date format '{}'.", date_format);
-    date_format
-}
+// fn date_format(args: &ArgMatches) -> &str {
+//     let date_format = match args.get_one::<String>(A_L_DATE_FORMAT) {
+//         Some(date_format) => date_format,
+//         None => constants::DATE_FORMAT_GIT,
+//     };
+//     log::debug!("Using date format '{}'.", date_format);
+//     date_format
+// }
 
 fn print_version_and_exit(quiet: bool) {
     #![allow(clippy::print_stdout)]
@@ -366,23 +444,32 @@ fn main() -> BoxResult<()> {
     let verbosity = verbosity(&args);
     logger::set_log_level(&log_filter_reload_handle, verbosity)?;
 
-    if args.get_flag(A_L_LIST) {
-        let environment = Environment::stub();
-        // let list = var::list_keys(&environment);
-        // log::info!("{}", list);
-        return Ok(());
-    }
+    // if args.get_flag(A_L_LIST) {
+    //     let environment = Environment::stub();
+    //     // let list = var::list_keys(&environment);
+    //     // log::info!("{}", list);
+    //     return Ok(());
+    // }
 
-    let repo_path = repo_path(&args);
-    let date_format = date_format(&args);
+    // let repo_path = repo_path(&args);
+    // let date_format = date_format(&args);
 
-    let overwrite = overwrite(&args);
+    // let overwrite = overwrite(&args);
+
+    let assertion_loc = args.get_one::<PathBuf>(A_L_ASSERTION).cloned();
+    let sign_key_loc = args.get_one::<PathBuf>(A_L_SIGNING_PRIVATE_KEY).cloned();
+    let source_image_loc = args.get_one::<PathBuf>(A_L_SOURCE_IMAGE).cloned();
+    let baked_loc = args.get_one::<PathBuf>(A_L_BAKED_IMAGE).cloned();
 
     let settings = Settings {
-        repo_path: Some(repo_path),
-        date_format: date_format.to_owned(),
-        overwrite,
+        // repo_path: Some(repo_path),
+        // date_format: date_format.to_owned(),
+        // overwrite,
         verbosity,
+        assertion_loc,
+        sign_key_loc,
+        source_image_loc,
+        baked_loc,
     };
     log::trace!("Created Settings.");
     let mut environment = Environment::new(settings);
