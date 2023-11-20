@@ -181,9 +181,6 @@ mod tests {
         obj.expires = Some(DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?.into());
         let json_ld = obj.to_json_ld()?;
 
-        // TODO HACK Remove this
-        std::fs::write("simple_json_serde.json", &json_ld)?;
-
         assert_eq!(&json_ld, EXP_JSON_LD_SIMPLE);
 
         Ok(())
@@ -209,7 +206,6 @@ mod tests {
             .expires(DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?)
             .build();
         let json_ld = obj.to_json_ld()?;
-        std::fs::write("simple_json_serde.json", &json_ld)?; // TODO HACK Remove this
 
         // let simple_json_our_own = simple.serialize_to_json();
         // std::fs::write("simple_json_our_own.json", &simple_json_our_own)?;
