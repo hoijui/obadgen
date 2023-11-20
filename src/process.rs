@@ -311,7 +311,7 @@ pub fn run(environment: &mut Environment) -> BoxResult<()> {
         environment.settings.source_image_loc.as_ref(),
         environment.settings.baked_loc.as_ref(),
     ) {
-        log::info!("Baking Open Badge Assertion from '{assertion_loc:#?}' into image file '{baked_loc:#?}' now ...");
+        log::info!("Baking Open Badge Assertion from {assertion_loc:#?} into image file {baked_loc:#?} now ...");
 
         let assertion = read_assertion(assertion_loc)?;
 
