@@ -70,6 +70,8 @@ the assertion JSON-LD content can either be:
   under the control of the issuing party,
   but it may be hosted/stored anywhere after that
 
+Also see [Full Example](#full-example) further down.
+
 ### Assertion Examples
 
 #### Hosted
