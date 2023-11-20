@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-#![feature(trait_alias)]
-
 pub mod box_err;
 pub mod cert_gen;
 pub mod constants;
