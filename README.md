@@ -79,7 +79,8 @@ Also see [Full Example](#full-example) further down.
 [res/ob-ents/badge-assertion-simple.json](
 res/ob-ents/badge-assertion-simple.json):
 
-```json{
+```json
+{
   "@context": "https://w3id.org/openbadges/v2",
   "type": "Assertion",
   "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-assertion-simple.json",
