@@ -92,7 +92,8 @@ fn write_with_key() -> BoxResult<()> {
         "hello.world.example".to_string(),
         "localhost".to_string(),
     ];
-    let cert = generate_simple_self_signed(subject_alt_names)?;
+    // let cert = cert_gen::create_rsa_cert(subject_alt_names)?;
+    let cert = rcgen::generate_simple_self_signed(subject_alt_names)?;
     let cert_cont = cert_gen::Container {
         cert: cert,
         file_base: constants::ISSUER_CERT_PATH_BASE.into(),
@@ -105,17 +106,17 @@ fn write_with_key() -> BoxResult<()> {
     // )?;
 
     let crypto_key = CryptographicKey::builder()
-        .id(constants::KEY_ID)
+        .id(constants::ISSUER_KEY_ID)
         .owner(constants::ISSUER_WITH_KEY_ID)
         .public_key_pem(cert_cont.cert.get_key_pair().public_key_pem())
         .build();
-    write_to_file(constants::KEY_PATH, crypto_key.to_json_ld()?)?;
+    write_to_file(constants::ISSUER_KEY_PATH, crypto_key.to_json_ld()?)?;
 
     let issuer = Issuer::builder()
         .id(constants::ISSUER_WITH_KEY_ID)
         .name("Issuer - with key")
         .url(constants::ISSUER_WITH_KEY_URL)
-        .public_key(constants::KEY_ID)
+        .public_key(constants::ISSUER_KEY_ID)
         .build();
     write_to_file(constants::ISSUER_WITH_KEY_PATH, issuer.to_json_ld()?)?;
 
@@ -143,7 +144,7 @@ fn write_with_key() -> BoxResult<()> {
             salt: Some(constants::BADGE_ASSERTION_RECIPIENT_SALT.to_string()),
         })
         .verification(Verification::new(VerificationType::SignedBadge {
-            creator: Some(constants::KEY_ID.to_string()),
+            creator: Some(constants::ISSUER_KEY_ID.to_string()),
         }))
         .issued_on(DateTime::parse_from_rfc3339(constants::DT_PAST)?)
         .expires(DateTime::parse_from_rfc3339(constants::DT_FAR_FUTURE)?)

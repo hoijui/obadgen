@@ -8,6 +8,8 @@ use std::path::PathBuf;
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, EnumString, EnumVariantNames, IntoStaticStr};
 
+use crate::signature::Algorithm;
+
 #[derive(
     Debug,
     ValueEnum,
@@ -151,7 +153,13 @@ pub struct Settings /*<S: ::std::hash::BuildHasher>*/ {
     pub assertion_loc: Option<PathBuf>,
     /// Location of the private key required for signing,
     /// if signing is used.
+    pub sign_alg: Algorithm,
+    /// Location of the private key required for signing,
+    /// if signing is used.
     pub sign_key_loc: Option<PathBuf>,
+    /// Location of the certification chain,
+    /// optionally incorporated if signing is used.
+    pub cert_loc: Option<PathBuf>,
     /// Location of the to be baked Open Badge image.
     pub source_image_loc: Option<PathBuf>,
     /// Location of the to be baked Open Badge image.

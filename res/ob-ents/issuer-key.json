@@ -3,5 +3,5 @@
   "type": "CryptographicKey",
   "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
   "owner": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
-  "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE1U0Hd7aBZzngMXPx+dEIrO9yyhDs\nQB4HuUIbK5CWaxuj5QCXHq9VUR+74trmBn873enu7yzZz4mLwqllyR6kqg==\n-----END PUBLIC KEY-----\n"
+  "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmGlHnG3UV7T67KxU99U8Pm2J7vfn\neee5g1vUHed/8JHxudUfenvOdHQLBX6kmNooUkfHjZwn5DC0ebNuelo8xA==\n-----END PUBLIC KEY-----\n"
 }

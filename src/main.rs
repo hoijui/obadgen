@@ -36,6 +36,7 @@ use lazy_static::lazy_static;
 use obadgen::box_err::BoxResult;
 use obadgen::constants::BADGE_ASSERTION_SIMPLE_ID;
 use obadgen::constants::BADGE_ASSERTION_WITH_KEY_ID;
+use obadgen::signature::Algorithm;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
@@ -64,6 +65,8 @@ pub const A_S_VERSION: char = 'V';
 const A_L_RAW_PANIC: &str = "raw-panic";
 const A_S_ASSERTION: char = 'a';
 const A_L_ASSERTION: &str = "assertion-in";
+// const A_S_SIGNING_ALGORITHM: char = 'A';
+const A_L_SIGNING_ALGORITHM: &str = "signing-algorithm";
 const A_S_SIGNING_PRIVATE_KEY: char = 'k';
 const A_L_SIGNING_PRIVATE_KEY: &str = "key";
 const A_S_SOURCE_IMAGE: char = 's';
@@ -142,6 +145,24 @@ fn arg_assertion() -> Arg {
         .value_hint(ValueHint::FilePath)
         .short(A_S_ASSERTION)
         .long(A_L_ASSERTION)
+        .action(ArgAction::Set)
+        // .default_value(sinks::DEFAULT_FILE_OUT)
+        .required(false)
+}
+
+fn arg_signing_algorithm() -> Arg {
+    Arg::new(A_L_SIGNING_ALGORITHM)
+        .help("Signing algorithm to use.")
+        .long_help(formatcp!(
+            "Which signing algorithm to use. \
+            This has to correspond to the private key type you supply, \
+            see -{A_S_SIGNING_PRIVATE_KEY}, --{A_L_SIGNING_PRIVATE_KEY}.",
+        ))
+        .num_args(1)
+        .value_parser(value_parser!(Algorithm))
+        .value_name("ALG")
+        // .short(A_S_SIGNING_ALGORITHM)
+        .long(A_L_SIGNING_ALGORITHM)
         .action(ArgAction::Set)
         // .default_value(sinks::DEFAULT_FILE_OUT)
         .required(false)
@@ -296,11 +317,12 @@ This does not affect the log level for the log-file.",
 // }
 
 lazy_static! {
-    static ref ARGS: [Arg; 9] = [
+    static ref ARGS: [Arg; 10] = [
         arg_version(),
         // arg_project_root(),
         arg_raw_panic(),
         arg_assertion(),
+        arg_signing_algorithm(),
         arg_key_file(),
         arg_source_image(),
         arg_baked(),
@@ -457,7 +479,12 @@ fn main() -> BoxResult<()> {
     // let overwrite = overwrite(&args);
 
     let assertion_loc = args.get_one::<PathBuf>(A_L_ASSERTION).cloned();
+    let sign_alg = args
+        .get_one::<Algorithm>(A_L_SIGNING_ALGORITHM)
+        .copied()
+        .unwrap_or_default();
     let sign_key_loc = args.get_one::<PathBuf>(A_L_SIGNING_PRIVATE_KEY).cloned();
+    let cert_loc = None; // TODO ... maybe, if at all possible
     let source_image_loc = args.get_one::<PathBuf>(A_L_SOURCE_IMAGE).cloned();
     let baked_loc = args.get_one::<PathBuf>(A_L_BAKED_IMAGE).cloned();
 
@@ -467,7 +494,9 @@ fn main() -> BoxResult<()> {
         // overwrite,
         verbosity,
         assertion_loc,
+        sign_alg,
         sign_key_loc,
+        cert_loc,
         source_image_loc,
         baked_loc,
     };

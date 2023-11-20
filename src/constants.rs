@@ -66,14 +66,12 @@ lazy_static! {
     // pub static ref BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED: &'static str = &BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED_OWNED;
 }
 
-pub const KEY_PATH: &str = formatcp!("{BASE_HOSTING_PATH}/key.json");
-pub const KEY_URL: &str = formatcp!("{BASE_HOSTING_URL}/{ISSUER_WITH_KEY_PATH}");
-pub const KEY_ID: &str = ISSUER_WITH_KEY_URL;
-
 pub const ISSUER_CERT_PATH_BASE: &str = formatcp!("{BASE_HOSTING_PATH}/issuer-key");
+pub const ISSUER_KEY_PATH: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.json");
+pub const ISSUER_KEY_URL: &str = formatcp!("{BASE_HOSTING_URL}/{ISSUER_WITH_KEY_PATH}");
+pub const ISSUER_KEY_ID: &str = ISSUER_KEY_URL;
 pub const ISSUER_KEY_PATH_PRIV: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.priv.der");
-pub const ISSUER_KEY_PATH_PUB: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.cert.pem");
-// pub const EMAIL_SALT: &str = "abcdefg123456789";
+pub const ISSUER_CERT_PATH_PUB: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.cert.pem");
 
 pub const ISSUER_WITH_KEY_PATH: &str = formatcp!("{BASE_HOSTING_PATH}/issuer-with-key.json");
 pub const ISSUER_WITH_KEY_URL: &str = formatcp!("{BASE_HOSTING_URL}/{ISSUER_WITH_KEY_PATH}");

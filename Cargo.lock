@@ -503,6 +503,7 @@ dependencies = [
  "monostate",
  "png",
  "rcgen",
+ "ring 0.17.5",
  "serde",
  "serde_json",
  "sha2",

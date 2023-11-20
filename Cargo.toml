@@ -31,6 +31,7 @@ monostate = "0.1"
 png = { git = "https://github.com/DeniseBryson/image-png.git" }
 # png = "0.17"
 rcgen = "0.11"
+ring = "0.17"
 serde = "1.0"
 serde_json = "1.0"
 sha2 = "0.10"

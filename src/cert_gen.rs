@@ -7,7 +7,9 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use rcgen::Certificate;
+// use rcgen::CertificateParams;
 use rcgen::RcgenError;
+// use rcgen::PKCS_RSA_SHA256;
 
 use thiserror::Error;
 
@@ -21,6 +23,15 @@ pub enum Error {
     #[error(transparent)]
     Rcgen(#[from] RcgenError),
 }
+
+// pub fn create_rsa_cert(
+//     subject_alt_names: impl Into<Vec<String>>,
+// ) -> Result<Certificate, RcgenError> {
+//     let mut params = CertificateParams::new(subject_alt_names);
+//     params.alg = &PKCS_RSA_SHA256;
+//     // *ZONK* RSA key-gen not supported!
+//     Certificate::from_params(params)
+// }
 
 pub struct Container {
     pub cert: Certificate,
