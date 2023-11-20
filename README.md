@@ -147,46 +147,28 @@ obadgen \
 
 ### Full Example
 
-Here we generate an RSA certificate,
-and use it to sign a badge assertion,
-which we then bake into an SVG,
-that thereafter can be stored and verified anywhere.
+Here we create a badge assertion,
+which we then sign and bake into an SVG.
+This SVG can thereafter be stored and verified anywhere.
 
 ```shell
-FILE_BASE="my_organization"
-ALG="RS256"
-
-# Generating the certificate
-openssl req \
-    -x509 \
-    -sha256 \
-    -nodes \
-    -newkey rsa:4096 \
-    -keyform DER \
-    -keyout "$FILE_BASE.x509_cert.priv_key.der" \
-    -days 730 \
-    -outform PEM \
-    -out "$FILE_BASE.x509_cert.cert.pem"
-
-# Extractign the public-key
-openssl rsa \
-    -in "$FILE_BASE.x509_cert.priv_key.der" \
-    -inform DER \
-    -RSAPublicKey_out \
-    -outform PEM \
-    -out "$FILE_BASE.x509_cert.pub_key.pem"
-PUBLIC_KEY_PEM="$(sed -e 's/\n/\\n/' "$FILE_BASE.x509_cert.pub_key.pem")"
-
-# Writing the badge asserion JSON-LD file
-ASSERTION_ID="https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-assertion-with-key.json"
-BADGE_CLASS_ID="https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-with-key.json"
+PRIV_KEY="res/ob-ents/issuer-key.priv.der"
+ALG="es256"
 ISSUER_ID="https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json"
-EMAIL="my.account@email.com"
+BADGE_CLASS_ID="https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/badge-definition-with-key.json"
+ASSERTION_ID="https://some-domain.com/anywhere/does-not-even-have-to-exist/because-signed/badge-assertion-with-key.json"
+EMAIL="recipient@email.com"
 RECIPIENT_SALT="dfvnk097t6iubasr"
 IDENTITY_HASH="sha256\$$(printf '%s%s' "$EMAIL" "$RECIPIENT_SALT" | sha256sum - | sed -e 's/ .*//')"
 DATE_NOW="$(date --iso-8601=seconds)"
 DATE_FUTURE="$(date --iso-8601=seconds --date="2099-12-30")"
-cat << EOF
+ASSERTION_FILE_PATH="assertion.json"
+IMG_EXT="svg"
+#IMG_EXT="png"
+SOURCE_IMAGE_BASE="res/media/img/test"
+
+# Writing the badge asserion JSON-LD file
+cat > "$ASSERTION_FILE_PATH" << EOF
 {
   "@context": "https://w3id.org/openbadges/v2",
   "type": "Assertion",
@@ -205,15 +187,15 @@ cat << EOF
   "issuedOn": "$DATE_NOW",
   "expires": "$DATE_FUTURE"
 }
-EOF > assertion.json
+EOF
 
 # Signs and bakes the assertion to baked-badge.svg
 obadgen \
-    --assertion assertion.json \
-    --signing-algorithm rs256 \
-    --key "$FILE_BASE.x509_cert.priv_key.der" \
-    --source-image raw-badge.svg \
-    --baked baked-badge.svg
+    --assertion "$ASSERTION_FILE_PATH" \
+    --signing-algorithm "$ALG" \
+    --key "$PRIV_KEY" \
+    --source-image "$SOURCE_IMAGE_BASE.$IMG_EXT" \
+    --baked "baked-badge.$IMG_EXT"
 ```
 
 ## Certificate or Key-Pair
