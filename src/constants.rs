@@ -68,7 +68,7 @@ lazy_static! {
 
 pub const ISSUER_CERT_PATH_BASE: &str = formatcp!("{BASE_HOSTING_PATH}/issuer-key");
 pub const ISSUER_KEY_PATH: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.json");
-pub const ISSUER_KEY_URL: &str = formatcp!("{BASE_HOSTING_URL}/{ISSUER_WITH_KEY_PATH}");
+pub const ISSUER_KEY_URL: &str = formatcp!("{BASE_HOSTING_URL}/{ISSUER_KEY_PATH}");
 pub const ISSUER_KEY_ID: &str = ISSUER_KEY_URL;
 pub const ISSUER_KEY_PATH_PRIV: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.priv.der");
 pub const ISSUER_CERT_PATH_PUB: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.cert.pem");

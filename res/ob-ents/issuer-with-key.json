@@ -4,5 +4,5 @@
   "id": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
   "name": "Issuer - with key",
   "url": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json",
-  "publicKey": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-with-key.json"
+  "publicKey": "https://raw.githubusercontent.com/hoijui/obadgen/master/res/ob-ents/issuer-key.json"
 }
