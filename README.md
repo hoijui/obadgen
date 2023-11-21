@@ -273,12 +273,15 @@ with its private-key in DER format:
 
 ```shell
 FILE_BASE="my_organization"
-ALG="ES256"
+ALG="es256"
 openssl req \
+    -new \
     -x509 \
+    -subj "/C=DE/ST=Berlin/L=Berlin/O=OSEG/OU=SW-Dev/CN=ose-germany.de/emailAddress=open-badges-123@ose-germany.de" \
     -sha256 \
     -nodes \
-    -newkey ecdsa:4096 \
+    -pkeyopt ec_paramgen_curve:prime256v1 \
+    -newkey ec \
     -keyform DER \
     -keyout "$FILE_BASE.x509_cert.priv_key.der" \
     -days 730 \
@@ -294,9 +297,11 @@ with its private-key in DER format:
 
 ```shell
 FILE_BASE="my_organization"
-ALG="RS256"
+ALG="rs256"
 openssl req \
+    -new \
     -x509 \
+    -subj "/C=DE/ST=Berlin/L=Berlin/O=OSEG/OU=SW-Dev/CN=ose-germany.de/emailAddress=open-badges-123@ose-germany.de" \
     -sha256 \
     -nodes \
     -newkey rsa:4096 \
@@ -323,7 +328,7 @@ and the public-key in PEM format:
 
 ```shell
 FILE_BASE="my_organization"
-ALG="ES256"
+ALG="es256"
 openssl genpkey \
     -algorithm RSA \
     -pkeyopt rsa_keygen_bits:4096 \
@@ -339,7 +344,8 @@ and the public-key in PEM format:
 
 ```shell
 FILE_BASE="my_organization"
-ALG="RS256"
+ALG="rs256"
+# TODO FIXME This is still the certificate, not a key-pair only!
 openssl req \
     -x509 \
     -sha256 \
@@ -412,9 +418,9 @@ openssl ec \
 
 #### Extract
 
-Extracts the public key from the an RSA private key-pair file
+Extracts the public key from an RSA private key-pair file
 (here one from an x.509 certificate, but can be any other)
-into a sepoarate file,
+into a separate file,
 and reformats that files content to be pasted directly
 into an Open Badge 2.0 _assertion.json_ file:
 
