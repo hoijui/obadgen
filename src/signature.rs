@@ -123,9 +123,13 @@ openssl ec -in private_key.pem -outform DER -out private_key.der
 pub fn load_private_key_pair(alg: Algorithm, key_file: impl AsRef<str>) -> BoxResult<Secret> {
     match alg.r#type() {
         AlgorithmType::None => Err("If you try to sign (indicated by suplying a private key), you also have to specify the signing algorithm explicitly (for security reasons)")?,
-        AlgorithmType::RSA => Secret::rsa_keypair_from_file(key_file.as_ref())
-            .map_err(|err| biscuit_to_process_err(&err, key_file.as_ref()).into()),
+        AlgorithmType::RSA => {
+            log::info!("Trying to read RSA private key from file {} ...", key_file.as_ref());
+            Secret::rsa_keypair_from_file(key_file.as_ref())
+                .map_err(|err| biscuit_to_process_err(&err, key_file.as_ref()).into())
+        }
         AlgorithmType::ECDSA => {
+            log::info!("Trying to read ECDSA private key from file {} ...", key_file.as_ref());
             Secret::ecdsa_keypair_from_file(alg.to_sig_alg(), key_file.as_ref())
                 .map_err(|err| biscuit_to_process_err(&err, key_file.as_ref()).into())
         }
