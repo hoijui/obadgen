@@ -12,20 +12,7 @@ use obadgen::signature::Algorithm;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
-// pub mod box_err;
-// mod constants;
-// mod environment;
-// mod hash;
 mod logger;
-// pub mod open_badge;
-// mod patcher;
-// mod process;
-// pub mod settings;
-// mod signature;
-// mod std_error;
-// mod util;
-// #[cfg(test)]
-// mod test_util;
 
 use obadgen::settings::{self, Settings, Verbosity};
 
