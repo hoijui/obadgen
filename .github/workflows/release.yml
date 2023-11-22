@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021-2022 Robin Vobruba <hoijui.quaero@gmail.com>
+# SPDX-FileCopyrightText: 2021 - 2023 Robin Vobruba <hoijui.quaero@gmail.com>
 #
 # SPDX-License-Identifier: Unlicense
 
@@ -75,7 +75,7 @@ jobs:
         build: [linux]
         include:
         - build: linux
-          os: ubuntu-20.04
+          os: ubuntu-latest
           rust: nightly
           target: x86_64-unknown-linux-musl
         # - build: linux-arm
@@ -116,7 +116,7 @@ jobs:
       run: scripts/env
 
     - name: Install packages (Ubuntu)
-      if: matrix.os == 'ubuntu-20.04'
+      if: matrix.os == 'ubuntu-latest'
       run: |
         scripts/install_deps_ubuntu
 
@@ -160,6 +160,25 @@ jobs:
     #       rustembedded/cross:arm-unknown-linux-gnueabihf \
     #       arm-linux-gnueabihf-strip \
     #       /target/arm-unknown-linux-gnueabihf/release/${{ env.BINARY }}
+
+    - name: Test Release Version (if binary)
+      shell: bash
+      run: |
+        export ENV_FILE="proj_build_envs.txt"
+        # This writes "BINARY=bla" to ENV_FILE
+        scripts/env
+        source "$ENV_FILE"
+        BIN="target/release/$BINARY"
+        if [ -f "$BIN" ]
+        then
+          VER_TOOL="$("$BIN" --version --quiet)"
+          VER_TAG="${GITHUB_REF#refs/*/}"
+          if ! [ "$VER_TOOL" == "$VER_TAG" ]
+          then
+            >&2 echo "ERROR: Version reported by tool ('$VER_TOOL') should equal release tag ('$VER_TAG')!"
+            exit 1
+          fi
+        fi
 
     - name: Build archive
       shell: bash
