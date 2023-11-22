@@ -55,7 +55,6 @@ mod logger;
 // #[cfg(test)]
 // mod test_util;
 
-use obadgen::environment::Environment;
 use obadgen::settings::{self, Settings, Verbosity};
 
 pub const A_L_VERSION: &str = "version";
@@ -501,8 +500,6 @@ fn main() -> BoxResult<()> {
         baked_loc,
     };
     log::trace!("Created Settings.");
-    let mut environment = Environment::new(settings);
-    log::trace!("Created Environment.");
 
-    obadgen::process::run(&mut environment)
+    obadgen::process::run(&settings)
 }

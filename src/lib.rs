@@ -5,7 +5,6 @@
 pub mod box_err;
 pub mod cert_gen;
 pub mod constants;
-pub mod environment;
 pub mod hash;
 mod objects;
 pub mod patcher;

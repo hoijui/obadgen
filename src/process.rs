@@ -11,8 +11,8 @@ use biscuit::jws::Secret;
 use chrono::DateTime;
 use thiserror::Error;
 
-use crate::environment::Environment;
 use crate::patcher::ImageType;
+use crate::settings::Settings;
 use crate::signature::Algorithm;
 use crate::Assertion;
 use crate::Identity;
@@ -305,22 +305,22 @@ fn create_baking_content(
 /// If signing the assertion fails.
 ///
 /// If encoding the assertion fails.
-pub fn run(environment: &mut Environment) -> BoxResult<()> {
+pub fn run(settings: &Settings) -> BoxResult<()> {
     if let (Some(assertion_loc), Some(source_image_loc), Some(baked_loc)) = (
-        environment.settings.assertion_loc.as_ref(),
-        environment.settings.source_image_loc.as_ref(),
-        environment.settings.baked_loc.as_ref(),
+        settings.assertion_loc.as_ref(),
+        settings.source_image_loc.as_ref(),
+        settings.baked_loc.as_ref(),
     ) {
         log::info!("Baking Open Badge Assertion from {assertion_loc:#?} into image file {baked_loc:#?} now ...");
 
         let assertion = read_assertion(assertion_loc)?;
 
-        let sign_alg = environment.settings.sign_alg;
+        let sign_alg = settings.sign_alg;
 
-        let key_loc_opt = environment.settings.sign_key_loc.as_ref();
+        let key_loc_opt = settings.sign_key_loc.as_ref();
         let key_priv_opt = read_priv_key_opt(sign_alg, key_loc_opt)?;
 
-        let cert_loc_opt = environment.settings.cert_loc.as_ref();
+        let cert_loc_opt = settings.cert_loc.as_ref();
         let x509_chain_opt = read_cert_chain_opt(cert_loc_opt)?;
 
         let (source_image_type, _baked_type) =
