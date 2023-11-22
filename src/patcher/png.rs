@@ -167,7 +167,9 @@ impl super::Patcher for Patcher {
         log::trace!("Writing input-image data ...");
         while let Ok(info) = reader.next_frame(&mut buf) {
             log::trace!("  Writing a frame ...");
-            let bytes = &buf[..info.buffer_size()];
+            let bytes = buf
+                .get(..info.buffer_size())
+                .expect("Only possible if the PNG Reader is buggy");
             writer.write_image_data(bytes).map_err(conv_write_err)?;
         }
 

@@ -62,7 +62,7 @@ pub enum Algorithm {
 
 impl Algorithm {
     #[must_use]
-    pub fn to_sig_alg(self) -> SignatureAlgorithm {
+    pub const fn to_sig_alg(self) -> SignatureAlgorithm {
         match self {
             Self::None => SignatureAlgorithm::None,
             Self::RS256 => SignatureAlgorithm::RS256,
@@ -74,7 +74,7 @@ impl Algorithm {
     }
 
     #[must_use]
-    pub fn r#type(self) -> AlgorithmType {
+    pub const fn r#type(self) -> AlgorithmType {
         match self {
             Self::None => AlgorithmType::None,
             Self::RS256 | Self::RS384 | Self::RS512 => AlgorithmType::RSA,

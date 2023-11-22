@@ -81,7 +81,7 @@ pub struct Obj {
 
 impl Obj {
     #[must_use]
-    pub fn new(r#type: ObjType) -> Self {
+    pub const fn new(r#type: ObjType) -> Self {
         Self {
             r#type,
             verification_property: None,

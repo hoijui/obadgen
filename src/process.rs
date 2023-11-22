@@ -150,7 +150,7 @@ pub fn run_examples() -> BoxResult<()> {
 fn read_assertion(assertion_loc: &Path) -> BoxResult<Assertion> {
     let assertion: Assertion = serde_json::from_reader(File::open(assertion_loc)?)?;
 
-    if let VerificationType::VerificationObject = assertion.verification.r#type {
+    if VerificationType::VerificationObject == assertion.verification.r#type {
         return Err(Error::InvalidSettings {
             msg: format!(
                 "An Assertions verification.type can not be {:#?}!",

@@ -19,7 +19,7 @@ impl Serialize for SerdeDateTime {
 
 impl From<DateTime<FixedOffset>> for SerdeDateTime {
     fn from(value: DateTime<FixedOffset>) -> Self {
-        SerdeDateTime(value)
+        Self(value)
     }
 }
 
