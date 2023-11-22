@@ -9,7 +9,6 @@ pub mod hash;
 mod objects;
 pub mod patcher;
 pub mod process;
-pub mod serde_date_time;
 pub mod settings;
 pub mod signature;
 pub mod std_error;

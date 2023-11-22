@@ -7,8 +7,8 @@ use monostate::MustBe;
 use serde::{Deserialize, Serialize};
 use typed_builder::TypedBuilder;
 
-use crate::serde_date_time::SerdeDateTime;
 use crate::util::defaults::default_bool;
+use crate::util::serde_date_time::SerdeDateTime;
 
 use super::identity::Obj as Identity;
 use super::verification::Obj as Verification;
