@@ -17,7 +17,6 @@ use obadgen::Issuer;
 use obadgen::ToJsonLd;
 use obadgen::Verification;
 use obadgen::VerificationType;
-use rcgen::generate_simple_self_signed;
 use std::fs;
 use tracing::Level;
 
