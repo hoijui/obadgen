@@ -5,16 +5,17 @@
 [package]
 name = "obadgen"
 version = "0.2.0"
-edition = "2021"
+license = "AGPL-3.0-or-later"
+authors = ["Robin Vobruba <hoijui.quaero@gmail.com>"]
 description = """
     Generates (aka "bakes") basic Open Badge annotated images (lib & CLI-tool).
     """
 repository = "https://github.com/hoijui/obadgen"
-keywords = ["cli", "open-badges"]
-categories = ["command-line-utilities", "open-badges", "generator"]
-license = "AGPL-3.0-or-later"
-authors = ["Robin Vobruba <hoijui.quaero@gmail.com>"]
-publish = false
+homepage = "https://github.com/hoijui/obadgen"
+keywords = ["cli", "utility", "open-badge"]
+categories = ["command-line-utilities", "text-processing", "multimedia::images"]
+readme = "README.md"
+edition = "2021"
 
 [lints.rust]
 rust_2021_compatibility = "warn"
