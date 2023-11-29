@@ -1,0 +1,179 @@
+#!/usr/bin/env sh
+# SPDX-FileCopyrightText: 2022-2023 Robin Vobruba <hoijui.quaero@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# See the output of "$0 -h" for details.
+
+# Exit immediately on each error and unset variable;
+# see: https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+#set -Eeuo pipefail
+set -eu
+
+script_path="$(readlink -f "$0")"
+script_dir="$(dirname "$script_path")"
+script_name="$(basename "$script_path")"
+
+repo="$(cd "$script_dir"/..; pwd)"
+
+print_help() {
+
+	echo "$script_name - Returns a sorted list of unique names"
+	echo "of branches within the current repo."
+	echo "Clarification:"
+	echo "'develop' != 'master'"
+	echo "'master' == 'origin/master' == 'remotes/contributor1/master'"
+	echo
+	echo "Usage:"
+	echo "  $script_name [OPTION...]"
+	echo "Options:"
+	echo "  -h, --help"
+	echo "    Shows this help message and exit"
+	echo "  -C [PATH]"
+	echo "    Uses a different dir (instead of the current) as the repo root"
+}
+
+# read command-line args
+i=1
+while [ "$i" -lt "$#" ]
+do
+	arg="$(eval "echo \$$i")"
+
+	case "$arg" in
+		-h|--help)
+			shift "$i"
+			print_help
+			exit 0
+			;;
+		-C|--repo)
+			shift "$i"
+			# eval "arg_num=\$$i"
+			# repo="$arg_num"
+			repo="$(eval "echo \$$i")"
+			shift "$i"
+			;;
+		*) # non-/unknown option
+			i=$((i + 1))
+			;;
+	esac
+done
+
+# See: <https://gist.github.com/briansmith/2ee42439923d8e65a266994d0f70180b>
+
+gen_ec=false
+gen_rsa=false
+
+build_dir="$repo/target/$script_name"
+keys_base_path="$build_dir/priv_key"
+results_file_base_path="$build_dir/key_loading_test_results"
+results_file_md="$results_file_base_path.md"
+results_file_html="$results_file_base_path.html"
+
+mkdir -p "build_dir"
+
+gen_variants() {
+
+	key_base_path="$1"
+	key_pem="$key_base_path.pem"
+# 	key_pkcs1_pem="$key_base_path.pkcs1.pem"
+# 	key_pkcs8_pem="$key_base_path.pkcs8.pem"
+	key_pkcs1_der="$key_base_path.pkcs1.der"
+	key_pkcs8_der="$key_base_path.pkcs8.der"
+	openssl pkey \
+		-inform pem \
+		-in "$key_pem" \
+		-outform der \
+		-out "$key_pkcs1_der"
+# 	openssl pkcs8 \
+# 		-inform der \
+# 		-in "$key_pkcs1_der" \
+# 		-topk8 \
+# 		-nocrypt \
+# 		-outform pem \
+# 		-out "$key_pkcs8_pem"
+	openssl pkcs8 \
+		-inform pem \
+		-in "$key_pem" \
+		-topk8 \
+		-nocrypt \
+		-outform der \
+		-out "$key_pkcs8_der"
+}
+
+if $gen_ec
+then
+	EC_CURVES=$(openssl ecparam \
+		-list_curves \
+		| grep ':' \
+		| sed -E \
+			-e 's/^ +//' \
+			-e 's/: .*$//' \
+		| grep -v '^Oakley-' \
+		| grep -v '^SM2' \
+		| tr '\n' ' ')
+	VARIANTS=$(printf '%s' "$EC_CURVES" | wc -w)
+
+	i=0
+	for ec_curve in $EC_CURVES
+	do
+		# i++
+		i=$(echo "$i + 1" | bc)
+		echo "INFO Generating ECDSA key set $i/$VARIANTS ..."
+		key_base_path="$keys_base_path.ec.$ec_curve"
+# 		key_pkcs1_pem="$key_base_path.pkcs1.pem"
+		key_pem="$key_base_path.pem"
+		openssl genpkey \
+			-algorithm EC \
+			-pkeyopt "ec_paramgen_curve:$ec_curve" \
+			-pkeyopt "ec_param_enc:named_curve" \
+			-outform pem \
+			-out "$key_pem"
+# 			-out "$key_pkcs1_pem"
+# 			-pkeyopt ec_paramgen_curve:P-256 \
+# 			-pkeyopt ec_paramgen_curve:P-384 \
+		gen_variants "$key_base_path"
+	done
+fi
+
+if $gen_rsa
+then
+	RSA_BIT_COUNTS="1024 2048 3072 4096"
+	VARIANTS=$(printf '%s' "$RSA_BIT_COUNTS" | wc -w)
+
+	i=0
+	for rsa_bit_count in $RSA_BIT_COUNTS
+	do
+		# i++
+		i=$(echo "$i + 1" | bc)
+		echo "INFO Generating RSA key set $i/$VARIANTS ..."
+		key_base_path="$keys_base_path.rsa.$rsa_bit_count"
+# 		key_pkcs1_pem="$key_base_path.pkcs1.pem"
+		key_pem="$key_base_path.pem"
+		openssl genpkey \
+			-algorithm RSA \
+			-pkeyopt "rsa_keygen_bits:$rsa_bit_count" \
+			-pkeyopt "rsa_keygen_pubexp:65537" \
+			-outform pem \
+			-out "$key_pem"
+# 			-out "$key_pkcs1_pem"
+		gen_variants "$key_base_path"
+	done
+fi
+
+cargo run \
+	--example key_testing \
+	-- \
+	"$build_dir" \
+	"$results_file_md"
+
+pandoc \
+	-s \
+	-f gfm \
+	-t html \
+	< "$results_file_md" \
+	> "$results_file_html"
+
+echo
+echo "Test Results:"
+echo "- $results_file_md"
+echo "- $results_file_html"
+echo
