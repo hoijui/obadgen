@@ -12,16 +12,16 @@ SPDX-License-Identifier: CC0-1.0
 [![REUSE status](
     https://api.reuse.software/badge/github.com/hoijui/obadgen)](
     https://api.reuse.software/info/github.com/hoijui/obadgen)
-[![crates.io](
+[![Package Releases](
     https://img.shields.io/crates/v/obadgen.svg)](
     https://crates.io/crates/obadgen)
-[![Docs](
+[![Documentation Releases](
     https://docs.rs/obadgen/badge.svg)](
     https://docs.rs/obadgen)
-[![dependency status](
+[![Dependency Status](
     https://deps.rs/repo/github/hoijui/obadgen/status.svg)](
     https://deps.rs/repo/github/hoijui/obadgen)
-[![Build status](
+[![Build Status](
     https://github.com/hoijui/obadgen/workflows/build/badge.svg)](
     https://github.com/hoijui/obadgen/actions)
 
