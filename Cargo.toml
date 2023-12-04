@@ -52,7 +52,7 @@ monostate = "0.1"
 p256 = "0.13"
 p384 = "0.13"
 # HACK We use this until Lukass patch is merged upstream
-png = { git = "https://github.com/DeniseBryson/image-png.git" }
+png = { git = "https://github.com/image-rs/image-png.git", commit = "acab1e6" }
 # png = "0.17"
 rcgen = "0.11"
 ring = "0.17"
