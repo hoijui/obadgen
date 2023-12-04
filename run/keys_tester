@@ -68,7 +68,7 @@ results_file_base_path="$build_dir/key_loading_test_results"
 results_file_md="$results_file_base_path.md"
 results_file_html="$results_file_base_path.html"
 
-mkdir -p "build_dir"
+mkdir -p "$build_dir"
 
 gen_variants() {
 
