@@ -38,7 +38,7 @@ fn create_reencoder<'a, W: std::io::Write>(
     info: &'a png::Info,
 ) -> Result<png::Encoder<'a, W>, Error> {
     log::trace!("Creating encoder ...");
-    Ok(if true {
+    Ok(if false {
         let mut encoder = png::Encoder::new(w, info.width, info.height);
         log::trace!("Setting encoder properties ...");
         if let Some(animation_control) = info.animation_control() {
