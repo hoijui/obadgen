@@ -76,9 +76,11 @@ fn create_reencoder<'a, W: std::io::Write>(
         // TODO Also set the other decoding properties, or use Lukass patched version of the png lib, that allwos to pass-on the Info struct in its entirety.
         encoder
     } else {
-        let mut encoder = png::Encoder::with_info(w, info.clone());
+        let mut enc_info = info.clone();
+        enc_info.interlaced = false;
+        let mut encoder = png::Encoder::with_info(w, enc_info);
         // encoder.set_adaptive_filter(png::AdaptiveFilterType::Adaptive);
-        encoder.set_adaptive_filter(png::AdaptiveFilterType::NonAdaptive);
+        // encoder.set_adaptive_filter(png::AdaptiveFilterType::NonAdaptive);
         encoder
     })
 }
