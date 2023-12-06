@@ -61,6 +61,9 @@ fn create_reencoder<'a, W: std::io::Write>(
             encoder.set_palette(palette.as_ref());
         }
         encoder.set_pixel_dims(info.pixel_dims);
+        if let Some(source_gamma) = info.source_gamma {
+            encoder.set_source_gamma(source_gamma);
+        }
         if let Some(source_chromaticities) = info.source_chromaticities {
             encoder.set_source_chromaticities(source_chromaticities);
         }
