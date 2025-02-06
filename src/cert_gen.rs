@@ -6,9 +6,9 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
-use rcgen::Certificate;
+use rcgen::CertifiedKey;
 // use rcgen::CertificateParams;
-use rcgen::RcgenError;
+use rcgen::Error as RcgenError;
 // use rcgen::PKCS_RSA_SHA256;
 
 use thiserror::Error;
@@ -34,7 +34,7 @@ pub enum Error {
 // }
 
 pub struct Container {
-    pub cert: Certificate,
+    pub certified_key: CertifiedKey,
     pub file_base: PathBuf,
 }
 
@@ -55,7 +55,7 @@ impl Container {
 
     #[must_use]
     pub fn priv_der(&self) -> Vec<u8> {
-        self.cert.serialize_private_key_der()
+        self.certified_key.key_pair.serialize_der()
     }
 
     #[must_use]
@@ -65,7 +65,7 @@ impl Container {
 
     #[must_use]
     pub fn priv_pem(&self) -> String {
-        self.cert.serialize_private_key_pem()
+        self.certified_key.key_pair.serialize_pem()
     }
 
     #[must_use]
@@ -79,7 +79,7 @@ impl Container {
     ///
     /// If encoding failed.
     pub fn cert_der(&self) -> Result<Vec<u8>, RcgenError> {
-        self.cert.serialize_der()
+        Ok(self.certified_key.cert.der().as_ref().into())
     }
 
     #[must_use]
@@ -93,7 +93,7 @@ impl Container {
     ///
     /// If encoding failed.
     pub fn cert_pem(&self) -> Result<String, RcgenError> {
-        self.cert.serialize_pem()
+        Ok(self.certified_key.cert.pem())
     }
 
     #[must_use]

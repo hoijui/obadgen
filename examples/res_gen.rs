@@ -92,9 +92,9 @@ fn write_with_key() -> BoxResult<()> {
         "localhost".to_string(),
     ];
     // let cert = cert_gen::create_rsa_cert(subject_alt_names)?;
-    let cert = rcgen::generate_simple_self_signed(subject_alt_names)?;
+    let certified_key = rcgen::generate_simple_self_signed(subject_alt_names)?;
     let cert_cont = cert_gen::Container {
-        cert: cert,
+        certified_key,
         file_base: constants::ISSUER_CERT_PATH_BASE.into(),
     };
     cert_cont.write_files()?;
@@ -107,7 +107,7 @@ fn write_with_key() -> BoxResult<()> {
     let crypto_key = CryptographicKey::builder()
         .id(constants::ISSUER_KEY_ID)
         .owner(constants::ISSUER_WITH_KEY_ID)
-        .public_key_pem(cert_cont.cert.get_key_pair().public_key_pem())
+        .public_key_pem(cert_cont.certified_key.key_pair.public_key_pem())
         .build();
     write_to_file(constants::ISSUER_KEY_PATH, crypto_key.to_json_ld()?)?;
 
