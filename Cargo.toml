@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 Robin Vobruba <hoijui.quaero@gmail.com>
+# SPDX-FileCopyrightText: 2023-2025 Robin Vobruba <hoijui.quaero@gmail.com>
 #
 # SPDX-License-Identifier: Unlicense
 
@@ -7,9 +7,7 @@ name = "obadgen"
 version = "0.2.1"
 license = "AGPL-3.0-or-later"
 authors = ["Robin Vobruba <hoijui.quaero@gmail.com>"]
-description = """
-    Generates (aka "bakes") basic Open Badge annotated images (lib & CLI-tool).
-    """
+description = """Generates (aka "bakes") basic Open Badge annotated images (lib & CLI-tool)."""
 repository = "https://github.com/hoijui/obadgen"
 homepage = "https://github.com/hoijui/obadgen"
 keywords = ["cli", "utility", "open-badge"]
