@@ -26,7 +26,7 @@ pub struct Obj {
     #[serde(rename = "@context")]
     #[builder(default = MustBe!("https://w3id.org/openbadges/v2"))]
     pub context: MustBe!("https://w3id.org/openbadges/v2"),
-    /// CryptographicKey
+    /// `CryptographicKey`
     #[builder(default = MustBe!("CryptographicKey"))]
     pub r#type: MustBe!("CryptographicKey"),
     /// The identifier for the key. Most platforms only support HTTP(s) identifiers.
@@ -34,7 +34,7 @@ pub struct Obj {
     pub id: String,
     /// The identifier for the Profile that owns this key.
     /// There should be a two-way connection between this Profile
-    /// and the CryptographicKey through the `owner` and `publicKey` properties.
+    /// and the `CryptographicKey` through the `owner` and `publicKey` properties.
     #[builder(setter(into))]
     pub owner: String,
     /// The PEM key encoding is a widely-used method to express public keys,

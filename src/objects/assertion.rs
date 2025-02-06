@@ -38,11 +38,11 @@ pub struct Obj {
     /// Unique IRI for the Assertion. If using hosted verification,
     /// this should be the URI where the assertion is accessible.
     /// For signed Assertions,
-    /// it is recommended to use a UUID in the `urn:uuid`` namespace.
+    /// it is recommended to use a UUID in the `urn:uuid` namespace.
     #[builder(setter(into))]
     pub id: String,
     /// IRI or document that describes the type of badge being awarded.
-    /// If an HTTP/HTTPS IRI The endpoint should be a BadgeClass.
+    /// If an HTTP/HTTPS IRI, The endpoint should be a `BadgeClass`.
     #[builder(setter(into))]
     pub badge: String,
     /// The recipient of the achievement.
@@ -57,7 +57,7 @@ pub struct Obj {
     /// IRI or document representing an image representing this user’s achievement.
     /// This must be a PNG or SVG image,
     /// and should be prepared via the Baking specification.
-    /// An 'unbaked' image for the badge is defined in the BadgeClass
+    /// An 'unbaked' image for the badge is defined in the `BadgeClass`
     /// and should not be duplicated here.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[builder(default)]

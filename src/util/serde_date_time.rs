@@ -33,7 +33,7 @@ impl TryFrom<&str> for SerdeDateTime {
 
 struct SerdeDateTimeVisitor;
 
-impl<'de> Visitor<'de> for SerdeDateTimeVisitor {
+impl Visitor<'_> for SerdeDateTimeVisitor {
     type Value = SerdeDateTime;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
