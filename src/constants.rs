@@ -1,12 +1,10 @@
-use const_format::formatcp;
-
 // SPDX-FileCopyrightText: 2023 Robin Vobruba <hoijui.quaero@gmail.com>
 //
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-use lazy_static::lazy_static;
-
 use crate::hash;
+use const_format::formatcp;
+use std::sync::LazyLock;
 
 /// The default date format.
 /// For formatting specifiers, see:
@@ -59,12 +57,16 @@ pub const BADGE_ASSERTION_SIMPLE_URL: &str =
 pub const BADGE_ASSERTION_SIMPLE_ID: &str = BADGE_ASSERTION_SIMPLE_URL;
 pub const BADGE_ASSERTION_RECIPIENT_EMAIL: &str = "recipient@email.com";
 pub const BADGE_ASSERTION_RECIPIENT_SALT: &str = "dfvnk0923#%^&87t6iubasr";
-lazy_static! {
-    pub static ref BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_UNSALTED: String = hash::sha256(BADGE_ASSERTION_RECIPIENT_EMAIL);
-    pub static ref BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED: String = hash::sha256_with_salt(BADGE_ASSERTION_RECIPIENT_EMAIL, BADGE_ASSERTION_RECIPIENT_SALT);
-    // pub static ref BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_UNSALTED: &'static str = &BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_UNSALTED_OWNED;
-    // pub static ref BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED: &'static str = &BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED_OWNED;
-}
+pub static BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_UNSALTED: LazyLock<String> =
+    LazyLock::new(|| hash::sha256(BADGE_ASSERTION_RECIPIENT_EMAIL));
+pub static BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED: LazyLock<String> = LazyLock::new(|| {
+    hash::sha256_with_salt(
+        BADGE_ASSERTION_RECIPIENT_EMAIL,
+        BADGE_ASSERTION_RECIPIENT_SALT,
+    )
+});
+// pub static BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_UNSALTED: LazyLock<&'static str> = LazyLock::new(|| &BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_UNSALTED_OWNED);
+// pub static BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED: LazyLock<&'static str> = LazyLock::new(|| &BADGE_ASSERTION_RECIPIENT_EMAIL_HASH_SALTED_OWNED);
 
 pub const ISSUER_CERT_PATH_BASE: &str = formatcp!("{BASE_HOSTING_PATH}/issuer-key");
 pub const ISSUER_KEY_PATH: &str = formatcp!("{ISSUER_CERT_PATH_BASE}.json");

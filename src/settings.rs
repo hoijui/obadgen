@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 use clap::ValueEnum;
-use lazy_static::lazy_static;
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::LazyLock};
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, EnumString, IntoStaticStr, VariantNames};
 
@@ -38,9 +37,7 @@ impl Default for Verbosity {
     }
 }
 
-lazy_static! {
-    static ref VARIANTS_LIST: Vec<Verbosity> = Verbosity::iter().collect();
-}
+static VARIANTS_LIST: LazyLock<Vec<Verbosity>> = LazyLock::new(|| Verbosity::iter().collect());
 
 impl Verbosity {
     const fn index(self) -> usize {

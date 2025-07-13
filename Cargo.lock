@@ -753,7 +753,6 @@ dependencies = [
  "env_logger",
  "git-version",
  "k256",
- "lazy_static",
  "log",
  "monostate",
  "p256",

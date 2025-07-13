@@ -4,13 +4,13 @@
 
 use clap::{command, value_parser, Arg, ArgAction, ArgMatches, Command, ValueHint};
 use const_format::formatcp;
-use lazy_static::lazy_static;
 use obadgen::box_err::BoxResult;
 use obadgen::constants::BADGE_ASSERTION_SIMPLE_ID;
 use obadgen::constants::BADGE_ASSERTION_WITH_KEY_ID;
 use obadgen::signature::Algorithm;
 use std::collections::HashSet;
 use std::path::PathBuf;
+use std::sync::LazyLock;
 
 mod logger;
 
@@ -72,7 +72,7 @@ fn arg_version() -> Arg {
 
 fn arg_raw_panic() -> Arg {
     Arg::new(A_L_RAW_PANIC)
-        .help("Use rusts native panic handling, if one occures.")
+        .help("Use rusts native panic handling, if one occurs.")
         .long_help(
             "Do not wrap rusts native panic handling functionality \
             in a more end-user-friendly way. \
@@ -89,9 +89,9 @@ fn arg_assertion() -> Arg {
             "Read Open Badge 2.0 JSON-LD Assertion from this file. \
             * The official definition (+ an example): \
               <https://www.imsglobal.org/sites/default/files/Badges/OBv2p0Final/index.html#BadgeClass> \
-            * A simple exampel of our own: \
+            * A simple example of our own: \
               <{BADGE_ASSERTION_SIMPLE_ID}> \
-            * A signed exampel of our own: \
+            * A signed example of our own: \
               <{BADGE_ASSERTION_WITH_KEY_ID}> \
             You can choose which format is used by the file-extension.
             Note that \"-\" has no special meaning here; \
@@ -131,7 +131,7 @@ fn arg_key_file() -> Arg {
         .help("Read a cryptographic private-key from this file.")
         .long_help(
             "Read a cryptographic private-key from this file. \
-            Currently only this is suported: \
+            Currently only this is supported: \
             * DER encoding of RSA keys",
         )
         .num_args(1)
@@ -274,8 +274,8 @@ This does not affect the log level for the log-file.",
 //         .required(false)
 // }
 
-lazy_static! {
-    static ref ARGS: [Arg; 10] = [
+pub static ARGS: LazyLock<[Arg; 10]> = LazyLock::new(|| {
+    [
         arg_version(),
         // arg_project_root(),
         arg_raw_panic(),
@@ -290,8 +290,8 @@ lazy_static! {
         // arg_overwrite(),
         // arg_list(),
         // arg_date_format(),
-    ];
-}
+    ]
+});
 
 fn find_duplicate_short_options() -> Vec<char> {
     let mut short_options: Vec<char> = ARGS.iter().filter_map(clap::Arg::get_short).collect();
