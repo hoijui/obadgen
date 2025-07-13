@@ -14,7 +14,7 @@ fn main() -> BoxResult<()> {
     // The certificate is now valid for localhost
     // and the domain "hello.world.example"
     println!("{}", certified_key.cert.pem());
-    println!("{}", certified_key.key_pair.serialize_pem());
+    println!("{}", certified_key.signing_key.serialize_pem());
 
     Ok(())
 }

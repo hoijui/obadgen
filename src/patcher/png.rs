@@ -38,51 +38,12 @@ fn create_reencoder<'a, W: std::io::Write>(
     info: &'a png::Info,
 ) -> Result<png::Encoder<'a, W>, Error> {
     log::trace!("Creating encoder ...");
-    Ok(if false {
-        let mut encoder = png::Encoder::new(w, info.width, info.height);
-        log::trace!("Setting encoder properties ...");
-        if let Some(animation_control) = info.animation_control() {
-            encoder
-                .set_animated(animation_control.num_frames, animation_control.num_plays)
-                .map_err(conv_write_err)?;
-            encoder
-                .set_sep_def_img(info.interlaced)
-                .map_err(conv_write_err)?;
-        }
-        encoder.set_color(info.color_type);
-        encoder.set_compression(info.compression);
-        encoder.set_depth(info.bit_depth);
-        if let Some(frame_control) = info.frame_control() {
-            encoder
-                .set_frame_delay(frame_control.delay_num, frame_control.delay_den)
-                .map_err(conv_write_err)?;
-        }
-        if let Some(palette) = &info.palette {
-            encoder.set_palette(palette.as_ref());
-        }
-        encoder.set_pixel_dims(info.pixel_dims);
-        if let Some(source_gamma) = info.source_gamma {
-            encoder.set_source_gamma(source_gamma);
-        }
-        if let Some(source_chromaticities) = info.source_chromaticities {
-            encoder.set_source_chromaticities(source_chromaticities);
-        }
-        if let Some(srgb) = info.srgb {
-            encoder.set_srgb(srgb);
-        }
-        if let Some(trns) = &info.trns {
-            encoder.set_trns(trns.as_ref());
-        }
-        // TODO Also set the other decoding properties, or use Lukass patched version of the png lib, that allwos to pass-on the Info struct in its entirety.
-        encoder
-    } else {
-        let mut enc_info = info.clone();
-        enc_info.interlaced = false;
-        let mut encoder = png::Encoder::with_info(w, enc_info);
-        // encoder.set_adaptive_filter(png::AdaptiveFilterType::Adaptive);
-        // encoder.set_adaptive_filter(png::AdaptiveFilterType::NonAdaptive);
-        encoder
-    })
+    let mut enc_info = info.clone();
+    enc_info.interlaced = false;
+    let mut encoder = png::Encoder::with_info(w, enc_info)?;
+    // encoder.set_adaptive_filter(png::AdaptiveFilterType::Adaptive);
+    // encoder.set_adaptive_filter(png::AdaptiveFilterType::NonAdaptive);
+    Ok(encoder)
 }
 
 impl super::Patcher for Patcher {
@@ -108,7 +69,12 @@ impl super::Patcher for Patcher {
         log::trace!("Creating reader ...");
         let mut reader = decoder.read_info().map_err(conv_read_err)?;
         // Allocate the output buffer.
-        let mut buf = vec![0; reader.output_buffer_size()];
+        let mut buf = vec![
+            0;
+            reader
+                .output_buffer_size()
+                .expect("output buffer does not fit into memory")
+        ];
 
         // let mut decoder = png::StreamingDecoder::new(input_buf);
         // let mut decoder_stream = decoder.as_;
@@ -148,7 +114,7 @@ impl super::Patcher for Patcher {
                         proposed: verify.as_ref().to_owned(),
                     });
                 } else {
-                    // Skip wirting this chunk,
+                    // Skip writing this chunk,
                     // to write it further down with the new value.
                     continue;
                 }

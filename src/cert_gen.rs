@@ -11,6 +11,7 @@ use rcgen::CertifiedKey;
 use rcgen::Error as RcgenError;
 // use rcgen::PKCS_RSA_SHA256;
 
+use rcgen::KeyPair;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -34,7 +35,7 @@ pub enum Error {
 // }
 
 pub struct Container {
-    pub certified_key: CertifiedKey,
+    pub certified_key: CertifiedKey<KeyPair>,
     pub file_base: PathBuf,
 }
 
@@ -55,7 +56,7 @@ impl Container {
 
     #[must_use]
     pub fn priv_der(&self) -> Vec<u8> {
-        self.certified_key.key_pair.serialize_der()
+        self.certified_key.signing_key.serialize_der()
     }
 
     #[must_use]
@@ -65,7 +66,7 @@ impl Container {
 
     #[must_use]
     pub fn priv_pem(&self) -> String {
-        self.certified_key.key_pair.serialize_pem()
+        self.certified_key.signing_key.serialize_pem()
     }
 
     #[must_use]

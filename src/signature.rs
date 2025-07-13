@@ -10,7 +10,7 @@ use clap::ValueEnum;
 // use ring::signature::RsaKeyPair;
 use ring::signature::KeyPair;
 use serde::{Deserialize, Serialize};
-use strum_macros::{EnumString, EnumVariantNames, IntoStaticStr};
+use strum_macros::{EnumString, IntoStaticStr, VariantNames};
 
 use crate::{box_err::BoxResult, process::Error, Assertion};
 
@@ -28,16 +28,7 @@ pub enum AlgorithmType {
 }
 
 #[derive(
-    Debug,
-    ValueEnum,
-    EnumString,
-    EnumVariantNames,
-    IntoStaticStr,
-    Eq,
-    PartialEq,
-    Clone,
-    Copy,
-    Default,
+    Debug, ValueEnum, EnumString, VariantNames, IntoStaticStr, Eq, PartialEq, Clone, Copy, Default,
 )]
 pub enum Algorithm {
     /// No encryption/signature is included for the JWT.

@@ -107,7 +107,7 @@ fn write_with_key() -> BoxResult<()> {
     let crypto_key = CryptographicKey::builder()
         .id(constants::ISSUER_KEY_ID)
         .owner(constants::ISSUER_WITH_KEY_ID)
-        .public_key_pem(cert_cont.certified_key.key_pair.public_key_pem())
+        .public_key_pem(cert_cont.certified_key.signing_key.public_key_pem())
         .build();
     write_to_file(constants::ISSUER_KEY_PATH, crypto_key.to_json_ld()?)?;
 
